@@ -1523,7 +1523,8 @@ async def run_periodically_orderfilled(interval, periodic_function):
 
 # get configuration variables
 config = configparser.ConfigParser()
-config.read("config.ini")
+# change to your config file name
+config.read("config_private.ini")
 environment = config.get("environment", "ENV")
 ACCOUNT_NUMBER = config.get(environment, "ACCOUNT_NUMBER")
 CONNECTION_PORT = int(config.get(environment, "CONNECTION_PORT"))

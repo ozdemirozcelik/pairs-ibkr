@@ -58,7 +58,7 @@ $ pip install -r requirements.txt
 
 # Configuration
 
-configure config.ini file in line with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3) and IB account details:
+* configure config.ini file in line with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3) and IB account details:
 
 ```ini
 # DESCRIPTIONS:
@@ -102,6 +102,15 @@ LOGFILE_NAME : logs\logdev_
 ...
 
 [production]
+...
+````
+* double check your config file name, it has your account number so pay attention before pushing to your public repository:
+````python
+(app.py)
+# get configuration variables
+config = configparser.ConfigParser()
+# change to your config file name
+config.read("config_private.ini")
 ...
 ````
 
