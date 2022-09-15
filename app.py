@@ -5,12 +5,11 @@ from ibapi.contract import Contract
 from ibapi.order import Order
 
 # import custom code
-from filled_orders import get_filled_orders
-from acc_summary import update_acc_pnl, get_acc_summary
+from filled_orders import update_filled_orders
+from acc_summary import get_acc_summary, update_acc_pnl, post_acc_pnl
 from current_positions import get_position, update_positions
 from open_orders import get_order_position_except_manual, get_order_id, get_order_status
 from dublicate_orders import get_dublicate_orders
-from split_ticker import splitticker
 
 # import others
 import threading
@@ -19,7 +18,7 @@ from datetime import datetime
 import pandas as pd
 import socket
 import asyncio, requests
-import nest_asyncio
+import nest_asyncio  # patches asyncio to allow nested use of asyncio
 import logging.handlers
 from pathlib import Path
 import configparser
@@ -285,16 +284,6 @@ async def check_signals():
                     print(f"\n{time_str()} - connection error (dub. order)")
                     pass
 
-                # TODO: THIS IS OLD, DELETE LATER
-                # api_url = API_GET_SIGNAL + str(duplicate_orders[i])
-                # signal_dic = requests.get(api_url).json()
-
-                # using a for loop to remove keys with Value as None
-                # safe to remove below loop
-                # for key, value in dict(signal_dic).items():
-                #     if value is None:
-                #         del signal_dic[key]
-
                 signal_dic["passphrase"] = PASSPHRASE
                 signal_dic["order_status"] = "canceled"
                 signal_dic["status_msg"] = "duplicate order"
@@ -444,8 +433,7 @@ async def check_signals():
                 # get the list of active orders with the same ticker
                 order_id_list = get_order_id(signal_dic["ticker1"], CONNECTION_PORT)
 
-                # TODO: you can get the order id list for the order created for SYNC_PAIR and cancel?
-
+                # TODO: can you get the order id list for the order created for SYNC_PAIR and then cancel?
                 if len(order_id_list) > 0:
 
                     print(f"\n{time_str()} - Multiple active order detected")
@@ -535,10 +523,12 @@ async def check_signals():
 
                             # update database with partially filled orders if SYNC_PAIR is NOT active
 
-                            # TODO: if SYNC_PAIR is on create related child orders and update prices accordingly.
+                            # TODO: look for a better way of implementing this.
+                            # if SYNC_PAIR is on create related child orders and update prices accordingly.
                             # this loop assumes that the second order(ticker2) of the pair is a market order,
                             # when market order is used, realizations for the first and second order are always propotional.
-                            # when SYNC_PAIR is on, it is high likely that relative type order is used for both tickers and realizations may not be propotional
+                            # when SYNC_PAIR is on, it is high likely that relative type order is used for both tickers
+                            # and realizations may not be propotional
 
                             if order_status_list[1] > 0 and not SYNC_PAIR:
 
@@ -551,7 +541,7 @@ async def check_signals():
 
                                 # save partially filled order prices
                                 # zip() with n arguments returns an iterator that generates tuples of length n
-                                # TODO: test partilly filled orders with TWS (for single and pairs)
+                                # TODO: test more for the partially filled orders with TWS (for single and pairs)
                                 for o, p in zip(array_orderid, array_avgprice):
                                     print(
                                         f"\n{time_str()} - updating order:{o} with price:{p}"
@@ -834,7 +824,7 @@ async def check_signals():
 
             # 5-check for available funds before sending an order
             # (active orders are not taken into consideration, define fund floor considering that)
-            # TODO: check if it makes sense to include margin for active order amounts
+            # TODO: check if it makes sense to include a margin for active order amounts
             # TODO: config hard limit for order amount (in $), or stock contract size?
 
             if (
@@ -897,8 +887,7 @@ async def check_signals():
             if trade_confirm:
 
                 # orders for pairs: 2nd order is dependent to first order
-                # 1st order is relative& 2nd order is set to market order
-                # TODO: test if it is applicable to set 2nd order as relative order
+                # best practice: 1st order is relative & 2nd order is set to market order
 
                 # IB connection parameters
                 app = TradingApp()
@@ -1464,58 +1453,34 @@ async def check_signals():
                             "an error occurred updating server with active order information."
                         )
 
+#######################
+### ASYNC FUNCTIONS ###
+#######################
 
-async def check_filled_orders():
-    global filled_orders
+# to update filled order information
+async def update_orders():    
+    #update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
+    # to update ticker positions and pnl
+    #update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)
+    #to update the most recent account pnl record
+    update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
+    
+# # to update ticker positions and pnl
+# async def update_positions_and_pnl():    
+#     update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)
 
-    filled_orders = get_filled_orders(CONNECTION_PORT)  # get unique filled order dict
-
-    if bool(filled_orders):
-
-        for o, p in filled_orders.items():
-            print(f"\n{time_str()} - updating order:{o} with price:{p}")
-            # logger.info(f'updating order:{o} with price:{p}')
-            time.sleep(0.5)
-
-            send_data = {
-                "passphrase": PASSPHRASE,
-                "price": round(float(p), 2),
-                "order_id": int(o),
-            }
-
-            response = requests.put(API_PUT_UPDATE, json=send_data)
-
-            if response.status_code == 200:
-                print(f"\n{time_str()} - order {o} is updated")
-            else:
-                print(
-                    f"\n{time_str()} - an error occurred updating the order {o} with price:{p}"
-                )
-                logger.error(f"an error occurred updating the order {o} with price:{p}")
-
-    else:
-
-        print(f"\n{time_str()} - no fulfilled orders to update")
-        # logger.info('no fulfilled orders to update')
-
-    # TODO: update current positions to server
-    # time.sleep(0.5)
-    # update_positions(ACCOUNT_NUMBER, Server_URL_Update_Pos, CONNECTION_PORT)
-    #
-    # TODO: account summary
-    # time.sleep(0.5)
-    # update_acc_pnl(Server_URL_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
-
-
-async def run_periodically_main(interval, periodic_function):
+# #to update the most recent account pnl record
+# async def update_pnl():     
+#     update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
+   
+# to register account pnl(historically)    
+async def post_pnl():     
+    post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
+    
+# to define priodic time intervals
+async def run_periodically(interval, periodic_function):
     while True:
         await asyncio.gather(asyncio.sleep(interval), periodic_function())
-
-
-async def run_periodically_orderfilled(interval, periodic_function):
-    while True:
-        await asyncio.gather(asyncio.sleep(interval), periodic_function())
-
 
 ##############
 ### CONFIG ###
@@ -1536,6 +1501,9 @@ API_GET_SIGNAL_WAITING = config.get(environment, "API_GET_SIGNAL_WAITING")
 API_GET_SIGNAL = config.get(environment, "API_GET_SIGNAL")
 API_GET_PAIR = config.get(environment, "API_GET_PAIR")
 API_GET_TICKER = config.get(environment, "API_GET_TICKER")
+API_UPDATE_PNL = config.get(environment, "API_UPDATE_PNL")
+API_PUT_PNL = config.get(environment, "API_PUT_PNL")
+API_GET_PNL = config.get(environment, "API_GET_PNL")
 CHECK_FUNDS_FOR_TRADE = config.getboolean(environment, "CHECK_FUNDS_FOR_TRADE")
 AVAILABLE_FUND_FLOOR = int(config.get(environment, "AVAILABLE_FUND_FLOOR"))
 LOGFILE_NAME = config.get(environment, "LOGFILE_NAME")
@@ -1596,10 +1564,17 @@ nest_asyncio.apply()
 # Updating PNL and positions is a separate thread
 
 loop = asyncio.get_event_loop()
+
 loop.create_task(
-    run_periodically_main(10, check_signals)
-)  # should complete the whole cycle in x secs
+    run_periodically(10, check_signals)
+)  # cycle in 10 secs
+
 loop.create_task(
-    run_periodically_orderfilled(300, check_filled_orders)
-)  # run every x hours
+    run_periodically(60*3, post_pnl)
+) # cycle in 60 min
+
+loop.create_task(
+    run_periodically(60*1, update_orders)
+) # cycle in 5 min
+
 loop.run_forever()

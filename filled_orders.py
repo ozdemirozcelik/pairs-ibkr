@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 import pandas as pd
 import socket
+import requests
 
 
 class Exec_Filter(ExecutionFilter):
@@ -141,24 +142,65 @@ def get_filled_orders(connection_port):
 
     return uniq_dict
 
+def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 
-# filled_orders = get_filled_orders(7497) #get the dictionary
+    global filled_orders
+
+    filled_orders = get_filled_orders(connection_port)  # get unique filled order dict
+
+    if bool(filled_orders):
+
+        for o, p in filled_orders.items():
+            print(f"\n{time_str()} - updating order:{o} with price:{p}")
+            # logger.info(f'updating order:{o} with price:{p}')
+            time.sleep(0.5)
+
+            send_data = {
+                "passphrase": PASSPHRASE,
+                "price": round(float(p), 2),
+                "order_id": int(o),
+            }
+            try:
+                response = requests.put(API_PUT_UPDATE, json=send_data)
+    
+                if response.status_code == 200:
+                    print(f"\n{time_str()} - order {o} is updated")
+                else:
+                    print(
+                        f"\n{time_str()} - an error occurred updating the order {o} with price:{p}"
+                    )
+                    #logger.error(f"an error occurred updating the order {o} with price:{p}")
+                    
+            except requests.Timeout:
+                # back off and retry
+                print(f"\n{time_str()} - timeout error")
+                pass
+
+            except requests.ConnectionError:
+                print(f"\n{time_str()} - connection error")
+                pass
+
+    else:
+
+        print(f"\n{time_str()} - no fulfilled orders to update")
+        # logger.info('no fulfilled orders to update')
+
+    time.sleep(0.5)
 
 
-# for key, value in filled_orders.items():
-#    print(f'\n{time_str()} - updating order:{key} with price:{value}')
+#ENABLE TO TEST:
+# import os
 
+# print("check if path is correct:", os.getcwd())
+# import configparser
 
-# print(bool(exec_dic))
-# exec_dic = get_filled_orders(4002) #get the dictionary
-# exec_df = get_filled_orders() #get the dataframe
-# exec_df.drop_duplicates()
+# config = configparser.ConfigParser()
+# config.read("config_private.ini")
+# environment = config.get("environment", "ENV")
+# account_number = config.get(environment, "ACCOUNT_NUMBER")
+# API_UPDATE_PNL = config.get(environment, "API_UPDATE_PNL")
+# API_PUT_UPDATE = config.get(environment, "API_PUT_UPDATE")
+# PASSPHRASE = config.get(environment, "PASSPHRASE")
+# connection_port = int(config.get(environment, "CONNECTION_PORT"))
 
-# array_orderID = exec_dic['OrID'] #convert dic item to list
-# array_avgprice = exec_dic['AvgPrice'] #convert dic item to list
-
-# for i in array_orderID: # iterate through list values
-#    print(i)
-
-# for f, b in zip(array_orderID, array_avgprice):
-#    print(f, b)
+# update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE)

@@ -104,7 +104,7 @@ LOGFILE_NAME : logs\logdev_
 [production]
 ...
 ````
-* double check your config file name, it has your account number so pay attention before pushing to your public repository:
+* double check your config file name. config.ini has the account number and webhook passphrase so pay attention before pushing to your public repository:
 ````python
 (app.py)
 # get configuration variables

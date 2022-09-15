@@ -8,7 +8,7 @@ import socket
 import requests
 import sys
 
-# TODO: error handling and log errors
+# TODO: error handling and logging
 class TradingApp(EWrapper, EClient):
     def __init__(self):
         EClient.__init__(self, self)
@@ -206,7 +206,7 @@ def get_all_positions_withpnl(account_number, connection_port):
         # create unrealized pnl list
         for ind in position_df_pnl.index:
             conid = position_df_pnl["ConId"][ind]
-            print("Updating ticker: ", position_df_pnl["Symbol"][ind])
+            print("Getting pos. information of ticker: ", position_df_pnl["Symbol"][ind])
             # logger.info(f'\'Updating ticker: {position_df_pnl["Symbol"][ind]}')
 
             # initiate pnl flow
@@ -275,7 +275,9 @@ def get_position(ticker, connection_port):
     return pos_value
 
 
-def update_positions(account_number, Server_URL_Update, connection_port):
+# edit & use if you want to send and save the data as a json file
+# needs Server_URL_Update and necessary coding on the server side
+def update_positions_as_json(account_number, Server_URL_Update, connection_port):
     global json_df
 
     pos_df = get_all_positions_withpnl(account_number, connection_port)
@@ -298,20 +300,73 @@ def update_positions(account_number, Server_URL_Update, connection_port):
     if response:
         print(f"\n{time_str()} - Portfolio position json file sent to server")
 
+#TODO: dd last update time? can be saved with account pnl update
+def update_positions(account_number, connection_port, PASSPHRASE, API_UPDATE_PNL):
+
+    # defined to observe in the varibale explorer (spyder)
+    global array_symbol, array_position, array_cost, array_pnl, positions_and_pnl
+
+    pos_df = get_all_positions_withpnl(account_number, connection_port)
+
+    array_symbol = pos_df["Symbol"]
+    array_position = pos_df["Position"]
+    array_cost = pos_df["Avg cost"]
+    array_pnl = pos_df["UnrealizedPnL"]
+    
+    positions_and_pnl = zip(array_symbol, array_position, array_cost, array_pnl)
+
+    if not pos_df.empty:
+
+        for s,p,c,u in positions_and_pnl:
+            print(f"\n{time_str()} - updating symbol:{s} with position:{p}")
+            time.sleep(0.5)
+            
+            send_data = {
+                "passphrase": PASSPHRASE,
+                "symbol": s,
+                "active_pos": int(p),
+                "active_cost":round(float(c), 3),
+                "active_pnl": int(u)
+            }
+            try:
+                response = requests.put(API_UPDATE_PNL, json=send_data, timeout=10)
+    
+                if response.status_code == 200:
+                    print(f"\n{time_str()} - symbol {s} is updated")
+                else:
+                    print(
+                        f"\n{time_str()} - an error occurred updating the symbol {s} with position:{p}"
+                    )
+                    #logger.error(f"an error occurred updating the symbol {s} with price:{p}")
+            except requests.Timeout:
+                # back off and retry
+                print(f"\n{time_str()} - timeout error")
+                pass
+
+            except requests.ConnectionError:
+                print(f"\n{time_str()} - connection error")
+                pass
+    else:
+
+        print(f"\n{time_str()} - no positions to update")
+        # logger.info('no positions to update')
 
 # ENABLE TO TEST:
-import os
+# import os
 
-print("check if path is correct:", os.getcwd())
-import configparser
+# print("check if path is correct:", os.getcwd())
+# import configparser
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-environment = config.get("environment", "ENV")
-account_number = config.get(environment, "ACCOUNT_NUMBER")
-connection_port = int(config.get(environment, "CONNECTION_PORT"))
+# config = configparser.ConfigParser()
+# config.read("config_private.ini")
+# environment = config.get("environment", "ENV")
+# account_number = config.get(environment, "ACCOUNT_NUMBER")
+# API_UPDATE_PNL = config.get(environment, "API_UPDATE_PNL")
+# PASSPHRASE = config.get(environment, "PASSPHRASE")
+# connection_port = int(config.get(environment, "CONNECTION_PORT"))
 
 
-pos_df_withoutpnl = get_all_positions(connection_port)
-pos_df_withpnl = get_all_positions_withpnl(account_number, connection_port)
-pos_value = get_position("LNT", connection_port)
+# #pos_df_withoutpnl = get_all_positions(connection_port)
+# #pos_df_withpnl = get_all_positions_withpnl(account_number, connection_port)
+# #pos_value = get_position("LNT", connection_port)
+# update_positions(account_number, connection_port, PASSPHRASE, API_UPDATE_PNL)

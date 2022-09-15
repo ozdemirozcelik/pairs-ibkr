@@ -132,7 +132,7 @@ def websocket_con():
     app2.run()
 
 
-# TODO: error handling and log errors
+# TODO: error handling and logging
 def get_all_orders(connection_port):
     global app2
 
