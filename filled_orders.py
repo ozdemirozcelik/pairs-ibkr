@@ -142,6 +142,7 @@ def get_filled_orders(connection_port):
 
     return uniq_dict
 
+
 def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 
     global filled_orders
@@ -162,15 +163,15 @@ def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
             }
             try:
                 response = requests.put(API_PUT_UPDATE, json=send_data)
-    
+
                 if response.status_code == 200:
                     print(f"\n{time_str()} - order {o} is updated")
                 else:
                     print(
                         f"\n{time_str()} - an error occurred updating the order {o} with price:{p}"
                     )
-                    #logger.error(f"an error occurred updating the order {o} with price:{p}")
-                    
+                    # logger.error(f"an error occurred updating the order {o} with price:{p}")
+
             except requests.Timeout:
                 # back off and retry
                 print(f"\n{time_str()} - timeout error")
@@ -188,7 +189,7 @@ def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
     time.sleep(0.5)
 
 
-#ENABLE TO TEST:
+# ENABLE TO TEST:
 # import os
 
 # print("check if path is correct:", os.getcwd())

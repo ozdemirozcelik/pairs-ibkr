@@ -248,6 +248,7 @@ def get_acc_summary_with_pnl(account_number, connection_port):
 
     return acc_summ_dict
 
+
 # edit & use if you want to send and save the data as a json file
 # needs Server_URL_Update and necessary coding on the server side
 def update_acc_pnl_as_json(Server_URL_PNL, account_number, connection_port):
@@ -271,51 +272,52 @@ def update_acc_pnl_as_json(Server_URL_PNL, account_number, connection_port):
 
 def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
 
-    global pnl_dic # used to see in the varibale explorer of spyder
+    global pnl_dic  # used to see in the varibale explorer of spyder
 
     pnl_dic = get_acc_summary_with_pnl(ACCOUNT_NUMBER, CONNECTION_PORT)
 
     if bool(pnl_dic):
 
-            send_data = {
-                "passphrase":PASSPHRASE,
-                "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(',','')),
-                "BuyingPower": float(pnl_dic["BuyingPower"].replace(',','')),
-                "DailyPnL": float(pnl_dic["DailyPnL"].replace(',','')),
-                "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(',','')),
-                "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(',','')),
-                "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(',','')),
-                "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(',','')),
-                "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(',',''))           
-            }
+        send_data = {
+            "passphrase": PASSPHRASE,
+            "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
+            "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
+            "DailyPnL": float(pnl_dic["DailyPnL"].replace(",", "")),
+            "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(",", "")),
+            "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
+            "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
+            "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(",", "")),
+            "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(",", "")),
+        }
 
-            try:
-                response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
-    
-                if response.status_code == 201:
-                    print(f"\n{time_str()} - account summary is posted")
-                else:
-                    print(
-                        f"\n{time_str()} - an error occurred posting the account summary"
-                    )
-                    #logger.error(f"an error occurred updating the symbol {s} with price:{p}")
-                    
-            except requests.Timeout:
-                # back off and retry
-                print(f"\n{time_str()} - timeout error")
-                pass
+        try:
+            response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
 
-            except requests.ConnectionError:
-                print(f"\n{time_str()} - connection error")
-                pass
+            if response.status_code == 201:
+                print(f"\n{time_str()} - account summary is posted")
+            else:
+                print(f"\n{time_str()} - an error occurred posting the account summary")
+                # logger.error(f"an error occurred updating the symbol {s} with price:{p}")
+
+        except requests.Timeout:
+            # back off and retry
+            print(f"\n{time_str()} - timeout error")
+            pass
+
+        except requests.ConnectionError:
+            print(f"\n{time_str()} - connection error")
+            pass
     else:
 
         print(f"\n{time_str()} - account summary is empty")
         # logger.info('account summary is empty"')
 
-def update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
 
-    global pnl_recent_dic, pnl_dic # used to see in the varibale explorer of spyder
+def update_acc_pnl(
+    PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
+):
+
+    global pnl_recent_dic, pnl_dic  # used to see in the varibale explorer of spyder
 
     try:
         print(f"\n{time_str()} - getting the latest PNL record")
@@ -325,43 +327,45 @@ def update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECT
         if response_list_dic:
             # get the most recent PNL record
             pnl_recent_dic = response_list_dic[0]
-    
+
             # get the latest row id
             rowid = pnl_recent_dic["rowid"]
-            
+
             date_format = "%Y-%m-%d %H:%M:%S"
             date_now = datetime.now(tz=pytz.utc)
             date_now_formatted = date_now.strftime(date_format)  # format as string
-           
-            pnl_dic = get_acc_summary_with_pnl(ACCOUNT_NUMBER, CONNECTION_PORT)
-        
-            if bool(pnl_dic):
-        
-                    send_data = {
-                        "passphrase":PASSPHRASE,
-                        "rowid":int(rowid),
-                        "timestamp":date_now_formatted,
-                        "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(',','')),
-                        "BuyingPower": float(pnl_dic["BuyingPower"].replace(',','')),
-                        "DailyPnL": float(pnl_dic["DailyPnL"].replace(',','')),
-                        "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(',','')),
-                        "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(',','')),
-                        "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(',','')),
-                        "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(',','')),
-                        "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(',',''))           
-                    }
 
-                    response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
-        
-                    if response.status_code == 200:
-                        print(f"\n{time_str()} - account summary is updated")
-                    else:
-                        print(
-                            f"\n{time_str()} - an error occurred updating the account summary"
-                        )
-                        #logger.error(f"an error occurred updating the symbol {s} with price:{p}")
+            pnl_dic = get_acc_summary_with_pnl(ACCOUNT_NUMBER, CONNECTION_PORT)
+
+            if bool(pnl_dic):
+
+                send_data = {
+                    "passphrase": PASSPHRASE,
+                    "rowid": int(rowid),
+                    "timestamp": date_now_formatted,
+                    "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
+                    "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
+                    "DailyPnL": float(pnl_dic["DailyPnL"].replace(",", "")),
+                    "GrossPositionValue": float(
+                        pnl_dic["GrossPositionValue"].replace(",", "")
+                    ),
+                    "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
+                    "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
+                    "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(",", "")),
+                    "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(",", "")),
+                }
+
+                response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
+
+                if response.status_code == 200:
+                    print(f"\n{time_str()} - account summary is updated")
+                else:
+                    print(
+                        f"\n{time_str()} - an error occurred updating the account summary"
+                    )
+                    # logger.error(f"an error occurred updating the symbol {s} with price:{p}")
             else:
-        
+
                 print(f"\n{time_str()} - account summary is empty")
                 # logger.info('account summary is empty"')
 
@@ -374,7 +378,8 @@ def update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECT
         print(f"\n{time_str()} - connection error")
         pass
 
-#ENABLE TO TEST:
+
+# ENABLE TO TEST:
 
 import os
 
@@ -400,4 +405,3 @@ PASSPHRASE = config.get(environment, "PASSPHRASE")
 # post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
 
 update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
-

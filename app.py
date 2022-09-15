@@ -1453,34 +1453,32 @@ async def check_signals():
                             "an error occurred updating server with active order information."
                         )
 
+
 #######################
 ### ASYNC FUNCTIONS ###
 #######################
 
 # to update filled order information
-async def update_orders():    
-    #update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
+async def update_orders():
+    update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
     # to update ticker positions and pnl
-    #update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)
-    #to update the most recent account pnl record
-    update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
-    
-# # to update ticker positions and pnl
-# async def update_positions_and_pnl():    
-#     update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)
+    update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)
+    # to update the most recent account pnl record
+    update_acc_pnl(
+        PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
+    )
 
-# #to update the most recent account pnl record
-# async def update_pnl():     
-#     update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
-   
-# to register account pnl(historically)    
-async def post_pnl():     
+
+# to register account pnl(historically)
+async def post_pnl():
     post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
-    
+
+
 # to define priodic time intervals
 async def run_periodically(interval, periodic_function):
     while True:
         await asyncio.gather(asyncio.sleep(interval), periodic_function())
+
 
 ##############
 ### CONFIG ###
@@ -1565,16 +1563,10 @@ nest_asyncio.apply()
 
 loop = asyncio.get_event_loop()
 
-loop.create_task(
-    run_periodically(10, check_signals)
-)  # cycle in 10 secs
+loop.create_task(run_periodically(10, check_signals))  # cycle in 10 secs
 
-loop.create_task(
-    run_periodically(60*3, post_pnl)
-) # cycle in 60 min
+loop.create_task(run_periodically(60 * 60, post_pnl))  # cycle in 60 min
 
-loop.create_task(
-    run_periodically(60*1, update_orders)
-) # cycle in 5 min
+loop.create_task(run_periodically(60 * 5, update_orders))  # cycle in 5 min
 
 loop.run_forever()
