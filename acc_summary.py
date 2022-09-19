@@ -282,13 +282,16 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
             "passphrase": PASSPHRASE,
             "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
             "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
-            "DailyPnL": float(pnl_dic["DailyPnL"].replace(",", "")),
             "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(",", "")),
             "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
             "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
-            "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(",", "")),
-            "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(",", "")),
         }
+
+        # add only if there is trade activity
+        if "DailyPnL" in pnl_dic:
+            send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
+            send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
+            send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
 
         try:
             response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
@@ -341,19 +344,18 @@ def update_acc_pnl(
 
                 send_data = {
                     "passphrase": PASSPHRASE,
-                    "rowid": int(rowid),
-                    "timestamp": date_now_formatted,
                     "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
                     "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
-                    "DailyPnL": float(pnl_dic["DailyPnL"].replace(",", "")),
-                    "GrossPositionValue": float(
-                        pnl_dic["GrossPositionValue"].replace(",", "")
-                    ),
+                    "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(",", "")),
                     "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
                     "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
-                    "RealizedPnL": float(pnl_dic["RealizedPnL"].replace(",", "")),
-                    "UnrealizedPnL": float(pnl_dic["UnrealizedPnL"].replace(",", "")),
                 }
+
+                # add only if there is trade activity
+                if "DailyPnL" in pnl_dic:
+                    send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
+                    send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
+                    send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
 
                 response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
 
@@ -381,19 +383,19 @@ def update_acc_pnl(
 
 # ENABLE TO TEST:
 
-import os
-
-print("check if path is correct:", os.getcwd())
-import configparser
-
-config = configparser.ConfigParser()
-config.read("config_private.ini")
-environment = config.get("environment", "ENV")
-ACCOUNT_NUMBER = config.get(environment, "ACCOUNT_NUMBER")
-CONNECTION_PORT = int(config.get(environment, "CONNECTION_PORT"))
-API_PUT_PNL = config.get(environment, "API_PUT_PNL")
-API_GET_PNL = config.get(environment, "API_GET_PNL")
-PASSPHRASE = config.get(environment, "PASSPHRASE")
+# import os
+#
+# print("check if path is correct:", os.getcwd())
+# import configparser
+#
+# config = configparser.ConfigParser()
+# config.read("config_private.ini")
+# environment = config.get("environment", "ENV")
+# ACCOUNT_NUMBER = config.get(environment, "ACCOUNT_NUMBER")
+# CONNECTION_PORT = int(config.get(environment, "CONNECTION_PORT"))
+# API_PUT_PNL = config.get(environment, "API_PUT_PNL")
+# API_GET_PNL = config.get(environment, "API_GET_PNL")
+# PASSPHRASE = config.get(environment, "PASSPHRASE")
 
 # account_summary_dict = get_acc_summary(
 #     ACCOUNT_NUMBER, CONNECTION_PORT
@@ -404,4 +406,4 @@ PASSPHRASE = config.get(environment, "PASSPHRASE")
 
 # post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
 
-update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)
+# update_acc_pnl(PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT)

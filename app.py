@@ -1301,10 +1301,10 @@ async def check_signals():
                         ):
 
                             print(
-                                f"\n{time_str()} - critical errors detected, will reroute to ISLAND"
+                                f"\n{time_str()} - critical errors detected, will reroute to primary exchange as market order"
                             )
                             logger.warning(
-                                "critical errors detected, will reroute to ISLAND"
+                                "critical errors detected, will reroute to primary exchange as market order"
                             )
 
                             # get error ids
@@ -1467,7 +1467,6 @@ async def update_orders():
     update_acc_pnl(
         PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
     )
-
 
 # to register account pnl(historically)
 async def post_pnl():
