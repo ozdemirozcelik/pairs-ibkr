@@ -727,15 +727,15 @@ async def check_signals():
                         round(mar_pos_size * float(hedge_param))
                     )
 
-                    new_order_contracts = (
+                    new_order_contracts2 = (
                         mar_pos_size_ticker2 - pos_size_ticker2 - order_pos_ticker2
                     )
 
                     print(
-                        f"\n{time_str()} -\n pos tick2: {pos_size_ticker2},\n exp pos tick2: {expected_pos_ticker2},\n mar pos tick2: {mar_pos_size_ticker2},\n new_order_contracts(ticker2): {new_order_contracts}"
+                        f"\n{time_str()} -\n pos tick2: {pos_size_ticker2},\n exp pos tick2: {expected_pos_ticker2},\n mar pos tick2: {mar_pos_size_ticker2},\n new_order_contracts2(ticker2): {new_order_contracts2}"
                     )
                     logger.info(
-                        f"pos tick2: {pos_size_ticker2}, exp pos tick2: {expected_pos_ticker2}, mar pos tick2: {mar_pos_size_ticker2}, new_order_contracts(ticker2): {new_order_contracts}"
+                        f"pos tick2: {pos_size_ticker2}, exp pos tick2: {expected_pos_ticker2}, mar pos tick2: {mar_pos_size_ticker2}, new_order_contracts2(ticker2): {new_order_contracts2}"
                     )
 
                     # prepare new order details
@@ -753,22 +753,22 @@ async def check_signals():
                     else:
                         new_pos = "flat"
 
-                    if mar_pos_size_ticker2 >= pos_size_ticker2:
+                    if new_order_contracts2>=0:
                         new_order_action = "buy"
                         new_comment = "Enter Long due to sync"
-                    elif mar_pos_size_ticker2 < pos_size_ticker2:
+                    elif new_order_contracts2<0:
                         new_order_action = "sell"
                         new_comment = "Enter Short due to sync"
 
                     # create a new order for ticker2 if 1st ticker has "zero" order size
-                    if order_contracts == 0:
+                    if order_contracts == 0 and new_order_contracts2 != 0:
 
                         send_data = {
                             "passphrase": PASSPHRASE,
                             # bypass is needed to create an order with a ticker that is already active in a pair
                             "bypass_ticker_status": True,
                             "order_action": new_order_action,
-                            "order_contracts": abs(new_order_contracts),
+                            "order_contracts": abs(new_order_contracts2),
                             "mar_pos": new_mar_pos,
                             "mar_pos_size": abs(mar_pos_size_ticker2),
                             "pre_mar_pos": new_pos,
@@ -802,25 +802,25 @@ async def check_signals():
 
                     # change hedge parameter if 1st ticker has valid order size
                     else:
+                        if order_contracts != 0:                        
+                            new_hedge_param = abs(
+                                round(new_order_contracts2 / order_contracts, 10)
+                            )  # order_contracts is always positive
 
-                        new_hedge_param = abs(
-                            round(new_order_contracts / order_contracts, 10)
-                        )  # order_contracts is always positive
-
-                        # check if contact difference is more than a certain amount, not necessary to be zero
-                        # usually 1 or 2 contracts is in acceptable range
-                        if abs(expected_pos_ticker2 - mar_pos_size_ticker2) > 2:
-
-                            hedge_param = new_hedge_param
-
-                            print(
-                                f"\n{time_str()} - New Hedge Param to be used:",
-                                hedge_param,
-                            )
-                            logger.info(f"New Hedge Param to be used: {hedge_param}")
-
-                        else:
-                            print(f"\n{time_str()} - No Change on Hedge Param:")
+                            # check if contact difference is more than a certain amount, not necessary to be zero
+                            # usually 1 or 2 contracts is in acceptable range
+                            if abs(expected_pos_ticker2 - mar_pos_size_ticker2) > 2:
+    
+                                hedge_param = new_hedge_param
+    
+                                print(
+                                    f"\n{time_str()} - New Hedge Param to be used:",
+                                    hedge_param,
+                                )
+                                logger.info(f"New Hedge Param to be used: {hedge_param}")
+    
+                            else:
+                                print(f"\n{time_str()} - No Change on Hedge Param:")
 
             # 5-check for available funds before sending an order
             # (active orders are not taken into consideration, define fund floor considering that)
