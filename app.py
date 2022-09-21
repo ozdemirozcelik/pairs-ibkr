@@ -8,7 +8,7 @@ from ibapi.order import Order
 from filled_orders import update_filled_orders
 from acc_summary import get_acc_summary, update_acc_pnl, post_acc_pnl
 from current_positions import get_position, update_positions
-from open_orders import get_order_position_except_manual, get_order_id, get_order_status
+from open_orders import get_order_position_except_manual, get_order_id, get_order_status, get_order_ticker
 from dublicate_orders import get_dublicate_orders
 
 # import others
@@ -468,16 +468,19 @@ async def check_signals():
 
                         # check for active orders before sending new order
                         for index in range(len(order_id_list)):
-
+               
+                            orderid_to_cancel = order_id_list[index]
+                            
                             # If there are partially filled orders, get_order_status as a list of the following:
                             # order_status_list[0] = remaining contacts
                             # order_status_list[1] = filled contracts
                             # order_status_list[2] = avg_price of filled order
-                            orderid_to_cancel = order_id_list[index]
                             order_status_list = get_order_status(
                                 int(orderid_to_cancel), CONNECTION_PORT
                             )
+                            
                             if signal_dic["ticker_type"] == "pair":
+                                
                                 orderid2_to_cancel = (
                                     order_id_list[index] + 1
                                 )  # next order ID as the child
@@ -515,97 +518,43 @@ async def check_signals():
                                     f"Order amount filled(ticker2): {order_status2_list[1]}"
                                 )
 
+                            # update filled orders before cancellation
+                            update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
+                            
                             # cancel old active order before sending new order
                             app.cancelOrder(orderid_to_cancel)
                             time.sleep(
                                 0.5
                             )  # some latency added to ensure that the connection is established
 
-                            # update database with partially filled orders if SYNC_PAIR is NOT active
+                            # updating canceled order status
+                            send_data = {
+                                # update fill prices
+                                "passphrase": PASSPHRASE,
+                                "order_id": orderid_to_cancel,
+                                # indicate that this order is canceled
+                                "cancel": True,
+                                "price": -1, # needs any value
+                                "filled_qty": -1 # needs any value
+                            }
 
-                            # TODO: look for a better way of implementing this.
-                            # if SYNC_PAIR is on create related child orders and update prices accordingly.
-                            # this loop assumes that the second order(ticker2) of the pair is a market order,
-                            # when market order is used, realizations for the first and second order are always propotional.
-                            # when SYNC_PAIR is on, it is high likely that relative type order is used for both tickers
-                            # and realizations may not be propotional
+                            response = requests.put(API_PUT_UPDATE, json=send_data)
 
-                            if order_status_list[1] > 0 and not SYNC_PAIR:
-
-                                array_orderid = [int(orderid_to_cancel)]
-                                array_avgprice = [order_status_list[2]]
-
-                                if signal_dic["ticker_type"] == "pair":
-                                    array_orderid.append(int(orderid2_to_cancel))
-                                    array_avgprice.append(order_status2_list[2])
-
-                                # save partially filled order prices
-                                # zip() with n arguments returns an iterator that generates tuples of length n
-                                # TODO: test more for the partially filled orders with TWS (for single and pairs)
-                                for o, p in zip(array_orderid, array_avgprice):
-                                    print(
-                                        f"\n{time_str()} - updating order:{o} with price:{p}"
-                                    )
-                                    logger.info(f"updating order:{o} with price:{p}")
-                                    time.sleep(0.5)
-
-                                    # updating partially filled orders
-                                    # (!) assumes that the partially filled order keeps the hedge ratio
-                                    send_data = {
-                                        # update fill prices
-                                        "passphrase": PASSPHRASE,
-                                        "price": round(float(p), 2),
-                                        "order_id": int(o),
-                                        # indicate that this is a partial fill
-                                        "partial": True,
-                                        # change contract amount to filled amount
-                                        "order_contracts": abs(
-                                            int(order_status_list[1])
-                                        ),
-                                    }
-
-                                    response = requests.put(
-                                        API_PUT_UPDATE, json=send_data
-                                    )
-
-                                    if response.status_code == 200:
-                                        print(f"\n{time_str()} - order {o} is updated")
-                                    else:
-                                        print(
-                                            f"\n{time_str()} - an error occurred updating the order {o}"
-                                        )
-                                        logger.error(
-                                            f"an error occurred updating the order {o}"
-                                        )
-
-                            # if cancelling all amount, not partially filled
+                            if response.status_code == 200:
+                                print(
+                                    f"\n{time_str()} - Active order canceled due to multiple active orders, ID: ",
+                                    orderid_to_cancel,
+                                )
+                                logger.info(
+                                    f"Active order canceled due to multiple active orders, ID: {orderid_to_cancel}"
+                                )
                             else:
-                                # updating canceled order status
-                                send_data = {
-                                    # update fill prices
-                                    "passphrase": PASSPHRASE,
-                                    "order_id": orderid_to_cancel,
-                                    # indicate that this order is canceled
-                                    "cancel": True,
-                                }
-
-                                response = requests.put(API_PUT_UPDATE, json=send_data)
-
-                                if response.status_code == 200:
-                                    print(
-                                        f"\n{time_str()} - Active order canceled due to multiple active orders, ID: ",
-                                        orderid_to_cancel,
-                                    )
-                                    logger.info(
-                                        f"Active order canceled due to multiple active orders, ID: {orderid_to_cancel}"
-                                    )
-                                else:
-                                    print(
-                                        f"\n{time_str()} - an error occurred updating the order ID {orderid_to_cancel}"
-                                    )
-                                    logger.error(
-                                        f"an error occurred updating the order ID {orderid_to_cancel}"
-                                    )
+                                print(
+                                    f"\n{time_str()} - an error occurred updating the order ID {orderid_to_cancel}"
+                                )
+                                logger.error(
+                                    f"an error occurred updating the order ID {orderid_to_cancel}"
+                                )
 
                         # close socket connection
                         app._socketShutdown()
@@ -1460,6 +1409,7 @@ async def check_signals():
 
 # to update filled order information
 async def update_orders():
+    # update filled orders
     update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
     # to update ticker positions and pnl
     update_positions(ACCOUNT_NUMBER, CONNECTION_PORT, PASSPHRASE, API_UPDATE_PNL)

@@ -64,9 +64,7 @@ def websocket_con():
 
 
 def get_filled_orders(connection_port):
-    global app3, exec_status_df
-
-    exec_dict = {"Ticker": "", "OrID": "", "AvgPrice": ""}
+    global app3, exec_status_df, output_df
 
     app3 = TradingApp()
 
@@ -77,7 +75,6 @@ def get_filled_orders(connection_port):
         print(
             f"\n{time_str()} - Client 3 cannot establish TWS connection to check for the filled orders"
         )
-        exec_dict = {}
 
     else:
 
@@ -104,6 +101,18 @@ def get_filled_orders(connection_port):
 
         OrID_List = []
         AvgPrice_List = []
+        CumQty_List =[]
+        
+        filled_df = pd.DataFrame(
+            columns=[
+                "Ticker",
+                "OrID",
+                "AvgPrice",
+                "CumQty"
+            ]
+        )
+        
+        output_df = filled_df.copy()
 
         for index, value in exec_series2.items():  # parse series values into a list
             append_1 = value.split("OrderId:", 1)[1]
@@ -111,23 +120,32 @@ def get_filled_orders(connection_port):
 
             append_2 = value.split("AvgPrice:", 1)[1]
             AvgPrice_List.append(append_2.split(",")[0].replace(" ", ""))
+            
+            append_3 = value.split("CumQty:", 1)[1]
+            CumQty_List.append(append_3.split(",")[0].replace(" ", ""))
 
-        exec_dict = {
-            "Ticker": exec_status_df["Symbol"],
-            "OrID": OrID_List,
-            "AvgPrice": AvgPrice_List,
-        }  # create dictionary from lists
-        # exec_df = pd.DataFrame(exec_dict) #convert dictionary to pandas dataframe
+        array_ticker = exec_status_df["Symbol"]  # convert dic item to array
+           
+        filled_df["Ticker"] = array_ticker      
+        filled_df["OrID"] = OrID_List
+        filled_df["AvgPrice"] = AvgPrice_List
+        filled_df["CumQty"] = CumQty_List
+       
+        filled_df['CumQty'] = filled_df['CumQty'].astype(float)
+        filled_df["AvgPrice"] = filled_df['AvgPrice'].astype(float)
 
-        array_orderID = exec_dict["OrID"]  # convert dic item to list
-        array_avgprice = exec_dict["AvgPrice"]  # convert dic item to list
+        uniq_orids = list(set(OrID_List))  # get a list of unique order ids
+        uniq_tickers = list(set(array_ticker))  # get a list of unique ticker
 
-        uniq_list = list(set(array_orderID))
+        for orid in uniq_orids:
+            filled_df_filtered = filled_df.loc[(filled_df['OrID'] == orid)]
 
-        uniq_dict = dict.fromkeys(uniq_list, "")
-
-        for o, p in zip(array_orderID, array_avgprice):
-            uniq_dict[o] = p
+            for ticker in uniq_tickers:  # get the latest order realization for each ticker
+                filled_df_filtered1 = filled_df_filtered.loc[(filled_df_filtered['Ticker'] == ticker)]
+                if not filled_df_filtered1.empty:
+                    filled_df_filtered2 = filled_df_filtered1.loc[
+                        filled_df_filtered['CumQty'] == filled_df_filtered1.CumQty.max()]
+                    output_df = output_df.append(filled_df_filtered2.iloc[0], ignore_index=True)
 
         # close socket
         app3._socketShutdown()
@@ -140,37 +158,40 @@ def get_filled_orders(connection_port):
 
         print(f"\n{time_str()} - TWS disconnected after checking for the filled orders")
 
-    return uniq_dict
+    return output_df
 
 
 def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 
     global filled_orders
 
-    filled_orders = get_filled_orders(connection_port)  # get unique filled order dict
-
-    if bool(filled_orders):
-
-        for o, p in filled_orders.items():
-            print(f"\n{time_str()} - updating order:{o} with price:{p}")
-            # logger.info(f'updating order:{o} with price:{p}')
+    filled_orders = get_filled_orders(connection_port)  # get unique filled order dataframe
+   
+    if not filled_orders.empty:
+        
+        for ind in filled_orders.index:           
+            print(f"\n{time_str()} - updating order:{filled_orders['OrID'][ind]} with price:{filled_orders['AvgPrice'][ind]}")
+            # logger.info(f'updating order:{filled_orders['OrID'][ind]} with price:{filled_orders['AvgPrice'][ind]}')
             time.sleep(0.5)
-
+                       
             send_data = {
                 "passphrase": PASSPHRASE,
-                "price": round(float(p), 2),
-                "order_id": int(o),
+                "price": filled_orders["AvgPrice"][ind],
+                "order_id": filled_orders["OrID"][ind],
+                "symbol": filled_orders["Ticker"][ind],
+                "filled_qty": filled_orders["CumQty"][ind]
             }
+
             try:
                 response = requests.put(API_PUT_UPDATE, json=send_data)
 
                 if response.status_code == 200:
-                    print(f"\n{time_str()} - order {o} is updated")
+                    print(f"\n{time_str()} - order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]} is updated")
                 else:
                     print(
-                        f"\n{time_str()} - an error occurred updating the order {o} with price:{p}"
+                        f"\n{time_str()} - an error occurred updating the order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]}"
                     )
-                    # logger.error(f"an error occurred updating the order {o} with price:{p}")
+                    # logger.error(f"an error occurred updating the order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]}")
 
             except requests.Timeout:
                 # back off and retry
@@ -203,5 +224,5 @@ def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 # API_PUT_UPDATE = config.get(environment, "API_PUT_UPDATE")
 # PASSPHRASE = config.get(environment, "PASSPHRASE")
 # connection_port = int(config.get(environment, "CONNECTION_PORT"))
-
+# #filled_orders = get_filled_orders(connection_port) 
 # update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE)

@@ -317,16 +317,31 @@ def get_order_id(ticker, connection_port):
 
     return search1_orderId_list
 
+def get_order_ticker(orderid, connection_port):
+    order_df = get_all_orders(connection_port)
+
+    search1 = order_df.loc[order_df["OrderId"] == orderid]
+
+    search1_symbol = search1["Symbol"]
+
+    search1_symbol_list = search1_symbol.values.tolist()  # series to list
+
+    return search1_symbol_list
+
 
 # ENABLE TO TEST
 # import os
 # print("check if path is correct:", os.getcwd())
 # import configparser
 # config = configparser.ConfigParser()
-# config.read('config.ini')
+# config.read('config_private.ini')
 # environment = config.get('environment', 'ENV')
 # connection_port = int(config.get(environment, 'CONNECTION_PORT'))
 #
-# order_id = get_order_id("NMFC",connection_port)
+#order_id = get_order_id("AAPL",connection_port)
 # if order_id:
 #     remaining_value = get_order_status(get_order_id("NMFC",connection_port)[0],connection_port)
+
+#status_df = get_all_status(connection_port)
+
+#order_ticker = get_order_ticker(0,connection_port)
