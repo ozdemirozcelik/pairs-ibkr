@@ -8,7 +8,7 @@ from ibapi.order import Order
 from filled_orders import update_filled_orders
 from acc_summary import get_acc_summary, update_acc_pnl, post_acc_pnl
 from current_positions import get_position, update_positions
-from open_orders import get_order_position_except_manual, get_order_id, get_order_status, get_order_ticker
+from open_orders import get_order_position_except_manual, get_order_id, get_order_status
 from dublicate_orders import get_dublicate_orders
 
 # import others
@@ -233,6 +233,9 @@ def MyOrder(**order_details):
 async def check_signals():
     # define global variables
     global app
+    
+    response_list_dic  =[] 
+    signal_dic = {}
 
     # print checking message and time
     print(f"\n{time_str()} - checking for tradingview webhook signals")
