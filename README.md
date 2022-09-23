@@ -1,6 +1,6 @@
 # Pairs-IBKR Python Pair Trading Bot using Interactive Brokers TWS API
 
-For trading tickers in pairs (possible to trade a single stock, fx, crypto).
+For trading tickers in pairs (also possible to trade a single stock, fx, crypto).
 
 * Trades on Interactive Brokers using [TWS-API](https://interactivebrokers.github.io/tws-api/introduction.html)
 * Integrated with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3)
@@ -15,32 +15,43 @@ With Pairs-API you can:
 - send real time orders (Relative, Market, Limit) to Interactive Brokers
 - get filled order information
 - get account summary
+- 
+# Considerations
+
+Considering for the next version:
+
+- improve error handling, add unit tests
+- using historical data from Interactive Brokers for:
+  - automated pair selection by using historical data from IB
+  - custom signal generator
 
 # Requirements
 
-* ibapi==9.76.1 (external library - manual installation)
-* asyncio
+* ibapi==9.76.1 (TWS API - manual installation for the newest version)
+* nest_asyncio
 * pytz
+* pandas
 * requests
+
 
 # Installation
 
-Download and install IB API:
+Download and install IB API for the latest version:
 [Installing & Configuring TWS for the Python API](https://www.youtube.com/watch?v=xqLkzDMvLz4)
+
+inherited "ibapi" folder in the repository from TWS-API docs.
 
 ### clone git repository:
 ```bash
-$ git clone https://github.com/ozdemirozcelik/pairs-ibkr.git
+$ git clone https://github.com/ozdemirozcelik/pairs-ibkr.git pairs-ibkr
 ````
 ### create and activate virtual environment:
 ````bash
 $ pip install virtualenv
 (conda install virtualenv)
 
-$ mkdir pairs-ibkr
-md pairs-ibkr (windows)
-
 $ cd pairs-ibkr
+cd pairs-ibkr (windows)
 
 $ python -m venv ibkr-env
 (conda create --name ibkr-env)
@@ -53,7 +64,7 @@ $ source ibkr-env/bin/activate
 
 ````
 $ pip install -r requirements.txt
-(conda install --file requirements.txt)
+(conda install --file requirements_conda.txt)
 ````
 
 # Configuration
@@ -93,6 +104,9 @@ API_PUT_UPDATE : http://127.0.0.1:5000/v3/signal/updateorder
 API_GET_SIGNAL : http://127.0.0.1:5000/v3/signal/
 API_GET_PAIR : http://127.0.0.1:5000/v3/pair/
 API_GET_TICKER : http://127.0.0.1:5000/v3/ticker/
+API_UPDATE_PNL : http://127.0.0.1:5000/v3/ticker/updatepnl
+API_PUT_PNL : http://127.0.0.1:5000/v3/regpnl
+API_GET_PNL : http://127.0.0.1:5000/v3/pnl/1
 API_GET_SIGNAL_WAITING : http://127.0.0.1:5000/v3/signals/status/waiting/0
 API_GET_SIGNAL_ROUTE : http://127.0.0.1:5000/v3/signals/status/rerouted/0
 ACCOUNT_NUMBER = DU######
@@ -114,13 +128,6 @@ config.read("config_private.ini")
 ...
 ````
 
-# Considerations
-
-Considering for the next version:
-
-using historical data from Interactive Brokers for:
-- automated pair trading analyzer
-- custom signal generator
 
 # Contributing
 
