@@ -66,6 +66,14 @@ $ source ibkr-env/bin/activate
 $ pip install -r requirements.txt
 (conda install --file requirements_conda.txt)
 ````
+try this if conda fails to install requirements:
+````
+(conda config --append channels conda-forge)
+````
+check this out if you get an invalidversionspec error:
+
+https://github.com/conda/conda/issues/9519#issuecomment-690486632
+
 
 # Configuration
 
