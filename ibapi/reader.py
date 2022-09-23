@@ -37,9 +37,10 @@ class EReader(Thread):
 
                 while len(buf) > 0:
                     (size, msg, buf) = comm.read_msg(buf)
-                    #logger.debug("resp %s", buf.decode('ascii'))
-                    logger.debug("size:%d msg.size:%d msg:|%s| buf:%s|", size,
-                        len(msg), buf, "|")
+                    # logger.debug("resp %s", buf.decode('ascii'))
+                    logger.debug(
+                        "size:%d msg.size:%d msg:|%s| buf:%s|", size, len(msg), buf, "|"
+                    )
 
                     if msg:
                         self.msg_queue.put(msg)
@@ -49,5 +50,4 @@ class EReader(Thread):
 
             logger.debug("EReader thread finished")
         except:
-            logger.exception('unhandled exception in EReader thread')
-
+            logger.exception("unhandled exception in EReader thread")

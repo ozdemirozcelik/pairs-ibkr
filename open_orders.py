@@ -317,6 +317,7 @@ def get_order_id(ticker, connection_port):
 
     return search1_orderId_list
 
+
 def get_order_ticker(orderid, connection_port):
     order_df = get_all_orders(connection_port)
 
@@ -338,10 +339,10 @@ def get_order_ticker(orderid, connection_port):
 # environment = config.get('environment', 'ENV')
 # connection_port = int(config.get(environment, 'CONNECTION_PORT'))
 #
-#order_id = get_order_id("AAPL",connection_port)
+# order_id = get_order_id("AAPL",connection_port)
 # if order_id:
 #     remaining_value = get_order_status(get_order_id("NMFC",connection_port)[0],connection_port)
 
-#status_df = get_all_status(connection_port)
+# status_df = get_all_status(connection_port)
 
-#order_ticker = get_order_ticker(0,connection_port)
+# order_ticker = get_order_ticker(0,connection_port)

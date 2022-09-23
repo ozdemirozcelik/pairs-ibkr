@@ -3,6 +3,7 @@ Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is su
  and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable.
 """
 
+
 class AccountSummaryTags:
     AccountType = "AccountType"
     NetLiquidation = "NetLiquidation"
@@ -34,14 +35,36 @@ class AccountSummaryTags:
     DayTradesRemaining = "DayTradesRemaining"
     Leverage = "Leverage"
 
-    AllTags = ",".join((AccountType, NetLiquidation, TotalCashValue,
-        SettledCash, AccruedCash, BuyingPower, EquityWithLoanValue,
-        PreviousEquityWithLoanValue, GrossPositionValue, ReqTEquity,
-        ReqTMargin, SMA, InitMarginReq, MaintMarginReq, AvailableFunds, 
-        ExcessLiquidity , Cushion, FullInitMarginReq, FullMaintMarginReq, 
-        FullAvailableFunds, FullExcessLiquidity,
-        LookAheadNextChange, LookAheadInitMarginReq, LookAheadMaintMarginReq,
-        LookAheadAvailableFunds, LookAheadExcessLiquidity, HighestSeverity,
-        DayTradesRemaining, Leverage))
-
-
+    AllTags = ",".join(
+        (
+            AccountType,
+            NetLiquidation,
+            TotalCashValue,
+            SettledCash,
+            AccruedCash,
+            BuyingPower,
+            EquityWithLoanValue,
+            PreviousEquityWithLoanValue,
+            GrossPositionValue,
+            ReqTEquity,
+            ReqTMargin,
+            SMA,
+            InitMarginReq,
+            MaintMarginReq,
+            AvailableFunds,
+            ExcessLiquidity,
+            Cushion,
+            FullInitMarginReq,
+            FullMaintMarginReq,
+            FullAvailableFunds,
+            FullExcessLiquidity,
+            LookAheadNextChange,
+            LookAheadInitMarginReq,
+            LookAheadMaintMarginReq,
+            LookAheadAvailableFunds,
+            LookAheadExcessLiquidity,
+            HighestSeverity,
+            DayTradesRemaining,
+            Leverage,
+        )
+    )

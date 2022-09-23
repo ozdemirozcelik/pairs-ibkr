@@ -21,13 +21,13 @@ server and client.
 
 import logging
 
-from ibapi.common import * # @UnusedWildImport
-from ibapi.utils import * # @UnusedWildImport
-from ibapi.contract import (Contract, ContractDetails, DeltaNeutralContract)
+from ibapi.common import *  # @UnusedWildImport
+from ibapi.utils import *  # @UnusedWildImport
+from ibapi.contract import Contract, ContractDetails, DeltaNeutralContract
 from ibapi.order import Order
 from ibapi.order_state import OrderState
 from ibapi.execution import Execution
-from ibapi.ticktype import * # @UnusedWildImport
+from ibapi.ticktype import *  # @UnusedWildImport
 from ibapi.commission_report import CommissionReport
 
 
@@ -40,32 +40,28 @@ class EWrapper:
 
     def logAnswer(self, fnName, fnParams):
         if logger.isEnabledFor(logging.INFO):
-            if 'self' in fnParams:
+            if "self" in fnParams:
                 prms = dict(fnParams)
-                del prms['self']
+                del prms["self"]
             else:
                 prms = fnParams
             logger.info("ANSWER %s %s", fnName, prms)
 
-
-    def error(self, reqId:TickerId, errorCode:int, errorString:str):
+    def error(self, reqId: TickerId, errorCode: int, errorString: str):
         """This event is called when there is an error with the
         communication or when TWS wants to send a message to the client."""
 
         self.logAnswer(current_fn_name(), vars())
         logger.error("ERROR %s %s %s", reqId, errorCode, errorString)
 
-
-    def winError(self, text:str, lastError:int):
+    def winError(self, text: str, lastError: int):
         self.logAnswer(current_fn_name(), vars())
-
 
     def connectAck(self):
         """ callback signifying completion of successful connection """
         self.logAnswer(current_fn_name(), vars())
 
-
-    def marketDataType(self, reqId:TickerId, marketDataType:int):
+    def marketDataType(self, reqId: TickerId, marketDataType: int):
         """TWS sends a marketDataType(type) callback to the API, where
         type is set to Frozen or RealTime, to announce that market data has been
         switched between frozen and real-time. This notification occurs only
@@ -76,39 +72,42 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickPrice(self, reqId:TickerId , tickType:TickType, price:float,
-                  attrib:TickAttrib):
+    def tickPrice(
+        self, reqId: TickerId, tickType: TickType, price: float, attrib: TickAttrib
+    ):
         """Market data tick price callback. Handles all price related ticks."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickSize(self, reqId:TickerId, tickType:TickType, size:int):
+    def tickSize(self, reqId: TickerId, tickType: TickType, size: int):
         """Market data tick size callback. Handles all size-related ticks."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickSnapshotEnd(self, reqId:int):
+    def tickSnapshotEnd(self, reqId: int):
         """When requesting market data snapshots, this market will indicate the
         snapshot reception is finished. """
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickGeneric(self, reqId:TickerId, tickType:TickType, value:float):
+    def tickGeneric(self, reqId: TickerId, tickType: TickType, value: float):
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickString(self, reqId:TickerId, tickType:TickType, value:str):
+    def tickString(self, reqId: TickerId, tickType: TickType, value: str):
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickEFP(self, reqId:TickerId, tickType:TickType, basisPoints:float,
-                formattedBasisPoints:str, totalDividends:float,
-                holdDays:int, futureLastTradeDate:str, dividendImpact:float,
-                dividendsToLastTradeDate:float):
+    def tickEFP(
+        self,
+        reqId: TickerId,
+        tickType: TickType,
+        basisPoints: float,
+        formattedBasisPoints: str,
+        totalDividends: float,
+        holdDays: int,
+        futureLastTradeDate: str,
+        dividendImpact: float,
+        dividendsToLastTradeDate: float,
+    ):
         self.logAnswer(current_fn_name(), vars())
         """ market data call back for Exchange for Physical
         tickerId -      The request's identifier.
@@ -127,11 +126,20 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def orderStatus(self, orderId:OrderId , status:str, filled:float,
-                    remaining:float, avgFillPrice:float, permId:int,
-                    parentId:int, lastFillPrice:float, clientId:int,
-                    whyHeld:str, mktCapPrice: float):
+    def orderStatus(
+        self,
+        orderId: OrderId,
+        status: str,
+        filled: float,
+        remaining: float,
+        avgFillPrice: float,
+        permId: int,
+        parentId: int,
+        lastFillPrice: float,
+        clientId: int,
+        whyHeld: str,
+        mktCapPrice: float,
+    ):
         """This event is called whenever the status of an order changes. It is
         also fired after reconnecting to TWS if the client has any open orders.
 
@@ -159,9 +167,9 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def openOrder(self, orderId:OrderId, contract:Contract, order:Order,
-                  orderState:OrderState):
+    def openOrder(
+        self, orderId: OrderId, contract: Contract, order: Order, orderState: OrderState
+    ):
         """This function is called to feed in open orders.
 
         orderID: OrderId - The order ID assigned by TWS. Use to cancel or
@@ -173,12 +181,10 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
     def openOrderEnd(self):
         """This is called at the end of a given request for open orders."""
 
         self.logAnswer(current_fn_name(), vars())
-
 
     def connectionClosed(self):
         """This function is called when TWS closes the sockets
@@ -186,82 +192,83 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def updateAccountValue(self, key:str, val:str, currency:str,
-                            accountName:str):
+    def updateAccountValue(self, key: str, val: str, currency: str, accountName: str):
         """ This function is called only when ReqAccountUpdates on
         EEClientSocket object has been called. """
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def updatePortfolio(self, contract:Contract, position:float,
-                        marketPrice:float, marketValue:float,
-                        averageCost:float, unrealizedPNL:float,
-                        realizedPNL:float, accountName:str):
+    def updatePortfolio(
+        self,
+        contract: Contract,
+        position: float,
+        marketPrice: float,
+        marketValue: float,
+        averageCost: float,
+        unrealizedPNL: float,
+        realizedPNL: float,
+        accountName: str,
+    ):
         """This function is called only when reqAccountUpdates on
         EEClientSocket object has been called."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def updateAccountTime(self, timeStamp:str):
+    def updateAccountTime(self, timeStamp: str):
         self.logAnswer(current_fn_name(), vars())
 
-
-    def accountDownloadEnd(self, accountName:str):
+    def accountDownloadEnd(self, accountName: str):
         """This is called after a batch updateAccountValue() and
         updatePortfolio() is sent."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def nextValidId(self, orderId:int):
+    def nextValidId(self, orderId: int):
         """ Receives next valid order id."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def contractDetails(self, reqId:int, contractDetails:ContractDetails):
+    def contractDetails(self, reqId: int, contractDetails: ContractDetails):
         """Receives the full contract's definitions. This method will return all
         contracts matching the requested via EEClientSocket::reqContractDetails.
         For example, one can obtain the whole option chain with it."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def bondContractDetails(self, reqId:int, contractDetails:ContractDetails):
+    def bondContractDetails(self, reqId: int, contractDetails: ContractDetails):
         """This function is called when reqContractDetails function
         has been called for bonds."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def contractDetailsEnd(self, reqId:int):
+    def contractDetailsEnd(self, reqId: int):
         """This function is called once all contract details for a given
         request are received. This helps to define the end of an option
         chain."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def execDetails(self, reqId:int, contract:Contract, execution:Execution):
+    def execDetails(self, reqId: int, contract: Contract, execution: Execution):
         """This event is fired when the reqExecutions() functions is
         invoked, or when an order is filled.  """
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def execDetailsEnd(self, reqId:int):
+    def execDetailsEnd(self, reqId: int):
         """This function is called once all executions have been sent to
         a client in response to reqExecutions()."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-
-    def updateMktDepth(self, reqId:TickerId , position:int, operation:int,
-                        side:int, price:float, size:int):
+    def updateMktDepth(
+        self,
+        reqId: TickerId,
+        position: int,
+        operation: int,
+        side: int,
+        price: float,
+        size: int,
+    ):
         """Returns the order book.
 
         tickerId -  the request's identifier
@@ -276,9 +283,17 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def updateMktDepthL2(self, reqId:TickerId , position:int, marketMaker:str,
-                          operation:int, side:int, price:float, size:int, isSmartDepth:bool):
+    def updateMktDepthL2(
+        self,
+        reqId: TickerId,
+        position: int,
+        marketMaker: str,
+        operation: int,
+        side: int,
+        price: float,
+        size: int,
+        isSmartDepth: bool,
+    ):
         """Returns the order book.
 
         tickerId -  the request's identifier
@@ -295,9 +310,9 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def updateNewsBulletin(self, msgId:int, msgType:int, newsMessage:str,
-                           originExch:str):
+    def updateNewsBulletin(
+        self, msgId: int, msgType: int, newsMessage: str, originExch: str
+    ):
         """ provides IB's bulletins
         msgId - the bulletin's identifier
         msgType - one of: 1 - Regular news bulletin 2 - Exchange no longer
@@ -307,13 +322,11 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def managedAccounts(self, accountsList:str):
+    def managedAccounts(self, accountsList: str):
         """Receives a comma-separated string with the managed account ids."""
         self.logAnswer(current_fn_name(), vars())
 
-
-    def receiveFA(self, faData:FaDataType , cxml:str):
+    def receiveFA(self, faData: FaDataType, cxml: str):
         """ receives the Financial Advisor's configuration available in the TWS
 
         faDataType - one of:
@@ -345,22 +358,27 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def historicalDataEnd(self, reqId:int, start:str, end:str):
+    def historicalDataEnd(self, reqId: int, start: str, end: str):
         """ Marks the ending of the historical bars reception. """
         self.logAnswer(current_fn_name(), vars())
 
-
-    def scannerParameters(self, xml:str):
+    def scannerParameters(self, xml: str):
         """ Provides the xml-formatted parameters available to create a market
         scanner.
 
         xml -   the xml-formatted string with the available parameters."""
         self.logAnswer(current_fn_name(), vars())
 
-
-    def scannerData(self, reqId:int, rank:int, contractDetails:ContractDetails,
-                     distance:str, benchmark:str, projection:str, legsStr:str):
+    def scannerData(
+        self,
+        reqId: int,
+        rank: int,
+        contractDetails: ContractDetails,
+        distance: str,
+        benchmark: str,
+        projection: str,
+        legsStr: str,
+    ):
         """ Provides the data resulting from the market scanner request.
 
         reqid - the request's identifier.
@@ -373,17 +391,25 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def scannerDataEnd(self, reqId:int):
+    def scannerDataEnd(self, reqId: int):
         """ Indicates the scanner data reception has terminated.
 
         reqId - the request's identifier"""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def realtimeBar(self, reqId: TickerId, time:int, open_: float, high: float, low: float, close: float,
-                        volume: int, wap: float, count: int):
+    def realtimeBar(
+        self,
+        reqId: TickerId,
+        time: int,
+        open_: float,
+        high: float,
+        low: float,
+        close: float,
+        volume: int,
+        wap: float,
+        count: int,
+    ):
 
         """ Updates the real time 5 seconds bars
 
@@ -401,22 +427,22 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-    def currentTime(self, time:int):
+    def currentTime(self, time: int):
         """ Server's current time. This method will receive IB server's system
         time resulting after the invokation of reqCurrentTime. """
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def fundamentalData(self, reqId:TickerId , data:str):
+    def fundamentalData(self, reqId: TickerId, data: str):
         """This function is called to receive fundamental
         market data. The appropriate market data subscription must be set
         up in Account Management before you can receive this data."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def deltaNeutralValidation(self, reqId:int, deltaNeutralContract:DeltaNeutralContract):
+    def deltaNeutralValidation(
+        self, reqId: int, deltaNeutralContract: DeltaNeutralContract
+    ):
         """Upon accepting a Delta-Neutral RFQ(request for quote), the
         server sends a deltaNeutralValidation() message with the DeltaNeutralContract
         structure. If the delta and price fields are empty in the original
@@ -426,23 +452,20 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-
-    def commissionReport(self, commissionReport:CommissionReport):
+    def commissionReport(self, commissionReport: CommissionReport):
         """The commissionReport() callback is triggered as follows:
         - immediately after a trade execution
         - by calling reqExecutions()."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def position(self, account:str, contract:Contract, position:float,
-                 avgCost:float):
+    def position(
+        self, account: str, contract: Contract, position: float, avgCost: float
+    ):
         """This event returns real-time positions for all accounts in
         response to the reqPositions() method."""
 
         self.logAnswer(current_fn_name(), vars())
-
 
     def positionEnd(self):
         """This is called once all position data for a given request are
@@ -450,43 +473,37 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def accountSummary(self, reqId:int, account:str, tag:str, value:str,
-                       currency:str):
+    def accountSummary(
+        self, reqId: int, account: str, tag: str, value: str, currency: str
+    ):
         """Returns the data from the TWS Account Window Summary tab in
         response to reqAccountSummary()."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def accountSummaryEnd(self, reqId:int):
+    def accountSummaryEnd(self, reqId: int):
         """This method is called once all account summary data for a
         given request are received."""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def verifyMessageAPI(self, apiData:str):
+    def verifyMessageAPI(self, apiData: str):
         """ Deprecated Function """
         self.logAnswer(current_fn_name(), vars())
 
-
-    def verifyCompleted(self, isSuccessful:bool, errorText:str):
-
-        self.logAnswer(current_fn_name(), vars())
-
-
-    def verifyAndAuthMessageAPI(self, apiData:str, xyzChallange:str):
+    def verifyCompleted(self, isSuccessful: bool, errorText: str):
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def verifyAndAuthCompleted(self, isSuccessful:bool, errorText:str):
+    def verifyAndAuthMessageAPI(self, apiData: str, xyzChallange: str):
 
         self.logAnswer(current_fn_name(), vars())
 
+    def verifyAndAuthCompleted(self, isSuccessful: bool, errorText: str):
 
-    def displayGroupList(self, reqId:int, groups:str):
+        self.logAnswer(current_fn_name(), vars())
+
+    def displayGroupList(self, reqId: int, groups: str):
         """This callback is a one-time response to queryDisplayGroups().
 
         reqId - The requestId specified in queryDisplayGroups().
@@ -497,8 +514,7 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def displayGroupUpdated(self, reqId:int, contractInfo:str):
+    def displayGroupUpdated(self, reqId: int, contractInfo: str):
         """This is sent by TWS to the API client once after receiving
         the subscription request subscribeToGroupEvents(), and will be sent
         again if the selected contract in the subscribed display group has
@@ -514,40 +530,59 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def positionMulti(self, reqId:int, account:str, modelCode:str,
-                      contract:Contract, pos:float, avgCost:float):
+    def positionMulti(
+        self,
+        reqId: int,
+        account: str,
+        modelCode: str,
+        contract: Contract,
+        pos: float,
+        avgCost: float,
+    ):
         """same as position() except it can be for a certain
         account/model"""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def positionMultiEnd(self, reqId:int):
+    def positionMultiEnd(self, reqId: int):
         """same as positionEnd() except it can be for a certain
         account/model"""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def accountUpdateMulti(self, reqId:int, account:str, modelCode:str,
-                            key:str, value:str, currency:str):
+    def accountUpdateMulti(
+        self,
+        reqId: int,
+        account: str,
+        modelCode: str,
+        key: str,
+        value: str,
+        currency: str,
+    ):
         """same as updateAccountValue() except it can be for a certain
         account/model"""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def accountUpdateMultiEnd(self, reqId:int):
+    def accountUpdateMultiEnd(self, reqId: int):
         """same as accountDownloadEnd() except it can be for a certain
         account/model"""
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def tickOptionComputation(self, reqId:TickerId, tickType:TickType ,
-            impliedVol:float, delta:float, optPrice:float, pvDividend:float,
-            gamma:float, vega:float, theta:float, undPrice:float):
+    def tickOptionComputation(
+        self,
+        reqId: TickerId,
+        tickType: TickType,
+        impliedVol: float,
+        delta: float,
+        optPrice: float,
+        pvDividend: float,
+        gamma: float,
+        vega: float,
+        theta: float,
+        undPrice: float,
+    ):
         """This function is called when the market in an option or its
         underlier moves. TWS's option model volatilities, prices, and
         deltas, along with the present value of dividends expected on that
@@ -555,10 +590,16 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def securityDefinitionOptionParameter(self, reqId:int, exchange:str,
-        underlyingConId:int, tradingClass:str, multiplier:str,
-        expirations:SetOfString, strikes:SetOfFloat):
+    def securityDefinitionOptionParameter(
+        self,
+        reqId: int,
+        exchange: str,
+        underlyingConId: int,
+        tradingClass: str,
+        multiplier: str,
+        expirations: SetOfString,
+        strikes: SetOfFloat,
+    ):
         """ Returns the option chain for an underlying on an exchange
         specified in reqSecDefOptParams There will be multiple callbacks to
         securityDefinitionOptionParameter if multiple exchanges are specified
@@ -575,8 +616,7 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def securityDefinitionOptionParameterEnd(self, reqId:int):
+    def securityDefinitionOptionParameterEnd(self, reqId: int):
         """ Called when all callbacks to securityDefinitionOptionParameter are
         complete
 
@@ -584,8 +624,7 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def softDollarTiers(self, reqId:int, tiers:list):
+    def softDollarTiers(self, reqId: int, tiers: list):
         """ Called when receives Soft Dollar Tier configuration information
 
         reqId - The request ID used in the call to EEClient::reqSoftDollarTiers
@@ -594,54 +633,70 @@ class EWrapper:
 
         self.logAnswer(current_fn_name(), vars())
 
-
-    def familyCodes(self, familyCodes:ListOfFamilyCode):
+    def familyCodes(self, familyCodes: ListOfFamilyCode):
         """ returns array of family codes """
         self.logAnswer(current_fn_name(), vars())
 
-
-    def symbolSamples(self, reqId:int,
-                      contractDescriptions:ListOfContractDescription):
+    def symbolSamples(
+        self, reqId: int, contractDescriptions: ListOfContractDescription
+    ):
         """ returns array of sample contract descriptions """
         self.logAnswer(current_fn_name(), vars())
 
-    def mktDepthExchanges(self, depthMktDataDescriptions:ListOfDepthExchanges):
+    def mktDepthExchanges(self, depthMktDataDescriptions: ListOfDepthExchanges):
         """ returns array of exchanges which return depth to UpdateMktDepthL2"""
         self.logAnswer(current_fn_name(), vars())
 
-    def tickNews(self, tickerId: int, timeStamp:int, providerCode:str, articleId:str, headline:str, extraData:str):
+    def tickNews(
+        self,
+        tickerId: int,
+        timeStamp: int,
+        providerCode: str,
+        articleId: str,
+        headline: str,
+        extraData: str,
+    ):
         """ returns news headlines"""
         self.logAnswer(current_fn_name(), vars())
 
-    def smartComponents(self, reqId:int, smartComponentMap:SmartComponentMap):
+    def smartComponents(self, reqId: int, smartComponentMap: SmartComponentMap):
         """returns exchange component mapping"""
         self.logAnswer(current_fn_name(), vars())
 
-    def tickReqParams(self, tickerId:int, minTick:float, bboExchange:str, snapshotPermissions:int):
+    def tickReqParams(
+        self, tickerId: int, minTick: float, bboExchange: str, snapshotPermissions: int
+    ):
         """returns exchange map of a particular contract"""
         self.logAnswer(current_fn_name(), vars())
 
-    def newsProviders(self, newsProviders:ListOfNewsProviders):
+    def newsProviders(self, newsProviders: ListOfNewsProviders):
         """returns available, subscribed API news providers"""
         self.logAnswer(current_fn_name(), vars())
 
-    def newsArticle(self, requestId:int, articleType:int, articleText:str):
+    def newsArticle(self, requestId: int, articleType: int, articleText: str):
         """returns body of news article"""
         self.logAnswer(current_fn_name(), vars())
 
-    def historicalNews(self, requestId:int, time:str, providerCode:str, articleId:str, headline:str):
+    def historicalNews(
+        self,
+        requestId: int,
+        time: str,
+        providerCode: str,
+        articleId: str,
+        headline: str,
+    ):
         """returns historical news headlines"""
         self.logAnswer(current_fn_name(), vars())
 
-    def historicalNewsEnd(self, requestId:int, hasMore:bool):
+    def historicalNewsEnd(self, requestId: int, hasMore: bool):
         """signals end of historical news"""
         self.logAnswer(current_fn_name(), vars())
 
-    def headTimestamp(self, reqId:int, headTimestamp:str):
+    def headTimestamp(self, reqId: int, headTimestamp: str):
         """returns earliest available data of a type of data for a particular contract"""
         self.logAnswer(current_fn_name(), vars())
 
-    def histogramData(self, reqId:int, items:HistogramData):
+    def histogramData(self, reqId: int, items: HistogramData):
         """returns histogram data for a contract"""
         self.logAnswer(current_fn_name(), vars())
 
@@ -661,11 +716,21 @@ class EWrapper:
         """returns minimum price increment structure for a particular market rule ID"""
         self.logAnswer(current_fn_name(), vars())
 
-    def pnl(self, reqId: int, dailyPnL: float, unrealizedPnL: float, realizedPnL: float):
+    def pnl(
+        self, reqId: int, dailyPnL: float, unrealizedPnL: float, realizedPnL: float
+    ):
         """returns the daily PnL for the account"""
         self.logAnswer(current_fn_name(), vars())
 
-    def pnlSingle(self, reqId: int, pos: int, dailyPnL: float, unrealizedPnL: float, realizedPnL: float, value: float):
+    def pnlSingle(
+        self,
+        reqId: int,
+        pos: int,
+        dailyPnL: float,
+        unrealizedPnL: float,
+        realizedPnL: float,
+        value: float,
+    ):
         """returns the daily PnL for a single position in the account"""
         self.logAnswer(current_fn_name(), vars())
 
@@ -673,22 +738,42 @@ class EWrapper:
         """returns historical tick data when whatToShow=MIDPOINT"""
         self.logAnswer(current_fn_name(), vars())
 
-    def historicalTicksBidAsk(self, reqId: int, ticks: ListOfHistoricalTickBidAsk, done: bool):
+    def historicalTicksBidAsk(
+        self, reqId: int, ticks: ListOfHistoricalTickBidAsk, done: bool
+    ):
         """returns historical tick data when whatToShow=BID_ASK"""
         self.logAnswer(current_fn_name(), vars())
 
-    def historicalTicksLast(self, reqId: int, ticks: ListOfHistoricalTickLast, done: bool):
+    def historicalTicksLast(
+        self, reqId: int, ticks: ListOfHistoricalTickLast, done: bool
+    ):
         """returns historical tick data when whatToShow=TRADES"""
         self.logAnswer(current_fn_name(), vars())
 
-    def tickByTickAllLast(self, reqId: int, tickType: int, time: int, price: float,
-                          size: int, tickAttribLast: TickAttribLast, exchange: str,
-                          specialConditions: str):
+    def tickByTickAllLast(
+        self,
+        reqId: int,
+        tickType: int,
+        time: int,
+        price: float,
+        size: int,
+        tickAttribLast: TickAttribLast,
+        exchange: str,
+        specialConditions: str,
+    ):
         """returns tick-by-tick data for tickType = "Last" or "AllLast" """
         self.logAnswer(current_fn_name(), vars())
 
-    def tickByTickBidAsk(self, reqId: int, time: int, bidPrice: float, askPrice: float,
-                         bidSize: int, askSize: int, tickAttribBidAsk: TickAttribBidAsk):
+    def tickByTickBidAsk(
+        self,
+        reqId: int,
+        time: int,
+        bidPrice: float,
+        askPrice: float,
+        bidSize: int,
+        askSize: int,
+        tickAttribBidAsk: TickAttribBidAsk,
+    ):
         """returns tick-by-tick data for tickType = "BidAsk" """
         self.logAnswer(current_fn_name(), vars())
 
@@ -699,8 +784,8 @@ class EWrapper:
     def orderBound(self, reqId: int, apiClientId: int, apiOrderId: int):
         """returns orderBound notification"""
         self.logAnswer(current_fn_name(), vars())
-        
-    def completedOrder(self, contract:Contract, order:Order, orderState:OrderState):
+
+    def completedOrder(self, contract: Contract, order: Order, orderState: OrderState):
         """This function is called to feed in completed orders.
 
         contract: Contract - The Contract class attributes describe the contract.

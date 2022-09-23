@@ -233,8 +233,8 @@ def MyOrder(**order_details):
 async def check_signals():
     # define global variables
     global app
-    
-    response_list_dic  =[] 
+
+    response_list_dic = []
     signal_dic = {}
 
     # print checking message and time
@@ -471,9 +471,9 @@ async def check_signals():
 
                         # check for active orders before sending new order
                         for index in range(len(order_id_list)):
-               
+
                             orderid_to_cancel = order_id_list[index]
-                            
+
                             # If there are partially filled orders, get_order_status as a list of the following:
                             # order_status_list[0] = remaining contacts
                             # order_status_list[1] = filled contracts
@@ -481,9 +481,9 @@ async def check_signals():
                             order_status_list = get_order_status(
                                 int(orderid_to_cancel), CONNECTION_PORT
                             )
-                            
+
                             if signal_dic["ticker_type"] == "pair":
-                                
+
                                 orderid2_to_cancel = (
                                     order_id_list[index] + 1
                                 )  # next order ID as the child
@@ -522,8 +522,10 @@ async def check_signals():
                                 )
 
                             # update filled orders before cancellation
-                            update_filled_orders(CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE)
-                            
+                            update_filled_orders(
+                                CONNECTION_PORT, PASSPHRASE, API_PUT_UPDATE
+                            )
+
                             # cancel old active order before sending new order
                             app.cancelOrder(orderid_to_cancel)
                             time.sleep(
@@ -537,8 +539,8 @@ async def check_signals():
                                 "order_id": orderid_to_cancel,
                                 # indicate that this order is canceled
                                 "cancel": True,
-                                "price": -1, # needs any value
-                                "filled_qty": -1 # needs any value
+                                "price": -1,  # needs any value
+                                "filled_qty": -1,  # needs any value
                             }
 
                             response = requests.put(API_PUT_UPDATE, json=send_data)
@@ -705,10 +707,10 @@ async def check_signals():
                     else:
                         new_pos = "flat"
 
-                    if new_order_contracts2>=0:
+                    if new_order_contracts2 >= 0:
                         new_order_action = "buy"
                         new_comment = "Enter Long due to sync"
-                    elif new_order_contracts2<0:
+                    elif new_order_contracts2 < 0:
                         new_order_action = "sell"
                         new_comment = "Enter Short due to sync"
 
@@ -754,7 +756,7 @@ async def check_signals():
 
                     # change hedge parameter if 1st ticker has valid order size
                     else:
-                        if order_contracts != 0:                        
+                        if order_contracts != 0:
                             new_hedge_param = abs(
                                 round(new_order_contracts2 / order_contracts, 10)
                             )  # order_contracts is always positive
@@ -762,15 +764,17 @@ async def check_signals():
                             # check if contact difference is more than a certain amount, not necessary to be zero
                             # usually 1 or 2 contracts is in acceptable range
                             if abs(expected_pos_ticker2 - mar_pos_size_ticker2) > 2:
-    
+
                                 hedge_param = new_hedge_param
-    
+
                                 print(
                                     f"\n{time_str()} - New Hedge Param to be used:",
                                     hedge_param,
                                 )
-                                logger.info(f"New Hedge Param to be used: {hedge_param}")
-    
+                                logger.info(
+                                    f"New Hedge Param to be used: {hedge_param}"
+                                )
+
                             else:
                                 print(f"\n{time_str()} - No Change on Hedge Param:")
 
@@ -1420,6 +1424,7 @@ async def update_orders():
     update_acc_pnl(
         PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
     )
+
 
 # to register account pnl(historically)
 async def post_pnl():

@@ -14,11 +14,11 @@ import socket
 import threading
 import logging
 
-from ibapi.common import * # @UnusedWildImport
-from ibapi.errors import * # @UnusedWildImport
+from ibapi.common import *  # @UnusedWildImport
+from ibapi.errors import *  # @UnusedWildImport
 
 
-#TODO: support SSL !!
+# TODO: support SSL !!
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +31,15 @@ class Connection:
         self.wrapper = None
         self.lock = threading.Lock()
 
-
     def connect(self):
         try:
             self.socket = socket.socket()
-        #TODO: list the exceptions you want to catch
+        # TODO: list the exceptions you want to catch
         except socket.error:
             if self.wrapper:
-                self.wrapper.error(NO_VALID_ID, FAIL_CREATE_SOCK.code(), FAIL_CREATE_SOCK.msg())
+                self.wrapper.error(
+                    NO_VALID_ID, FAIL_CREATE_SOCK.code(), FAIL_CREATE_SOCK.msg()
+                )
 
         try:
             self.socket.connect((self.host, self.port))
@@ -46,8 +47,7 @@ class Connection:
             if self.wrapper:
                 self.wrapper.error(NO_VALID_ID, CONNECT_FAIL.code(), CONNECT_FAIL.msg())
 
-        self.socket.settimeout(1)   #non-blocking
-
+        self.socket.settimeout(1)  # non-blocking
 
     def disconnect(self):
         self.lock.acquire()
@@ -62,10 +62,8 @@ class Connection:
         finally:
             self.lock.release()
 
-
     def isConnected(self):
         return self.socket is not None
-
 
     def sendMsg(self, msg):
 
@@ -90,7 +88,6 @@ class Connection:
 
         return nSent
 
-
     def recvMsg(self):
         if not self.isConnected():
             logger.debug("recvMsg attempted while not connected, releasing lock")
@@ -110,7 +107,6 @@ class Connection:
 
         return buf
 
-
     def _recvAllMsg(self):
         cont = True
         allbuf = b""
@@ -124,4 +120,3 @@ class Connection:
                 cont = False
 
         return allbuf
-

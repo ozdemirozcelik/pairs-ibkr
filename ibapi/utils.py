@@ -37,27 +37,44 @@ class LogFunction(object):
     def __call__(self, fn):
         def newFn(origSelf, *args, **kwargs):
             if logger.getLogger().isEnabledFor(self.logLevel):
-                argNames = [argName for argName in inspect.getfullargspec(fn)[0] if argName != 'self']
-                logger.log(self.logLevel,
-                    "{} {} {} kw:{}".format(self.text, fn.__name__,
-                        [nameNarg for nameNarg in zip(argNames, args) if nameNarg[1] is not origSelf], kwargs))
+                argNames = [
+                    argName
+                    for argName in inspect.getfullargspec(fn)[0]
+                    if argName != "self"
+                ]
+                logger.log(
+                    self.logLevel,
+                    "{} {} {} kw:{}".format(
+                        self.text,
+                        fn.__name__,
+                        [
+                            nameNarg
+                            for nameNarg in zip(argNames, args)
+                            if nameNarg[1] is not origSelf
+                        ],
+                        kwargs,
+                    ),
+                )
             fn(origSelf, *args)
+
         return newFn
 
 
-def current_fn_name(parent_idx = 0):
-    #depth is 1 bc this is already a fn, so we need the caller
+def current_fn_name(parent_idx=0):
+    # depth is 1 bc this is already a fn, so we need the caller
     return sys._getframe(1 + parent_idx).f_code.co_name
 
 
 def setattr_log(self, var_name, var_value):
-    #import code; code.interact(local=locals())
+    # import code; code.interact(local=locals())
     logger.debug("%s %s %s=|%s|", self.__class__, id(self), var_name, var_value)
     super(self.__class__, self).__setattr__(var_name, var_value)
 
 
 SHOW_UNSET = True
-def decode(the_type, fields, show_unset = False):
+
+
+def decode(the_type, fields, show_unset=False):
     try:
         s = next(fields)
     except StopIteration:
@@ -69,9 +86,11 @@ def decode(the_type, fields, show_unset = False):
         if type(s) is str:
             return s
         elif type(s) is bytes:
-            return s.decode(errors='backslashreplace')
+            return s.decode(errors="backslashreplace")
         else:
-            raise TypeError("unsupported incoming type " + type(s) + " for desired type 'str")
+            raise TypeError(
+                "unsupported incoming type " + type(s) + " for desired type 'str"
+            )
 
     orig_type = the_type
     if the_type is bool:
@@ -96,22 +115,22 @@ def decode(the_type, fields, show_unset = False):
     return n
 
 
-
 def ExerciseStaticMethods(klass):
 
     import types
-    #import code; code.interact(local=dict(globals(), **locals()))
+
+    # import code; code.interact(local=dict(globals(), **locals()))
     for (_, var) in inspect.getmembers(klass):
-        #print(name, var, type(var))
+        # print(name, var, type(var))
         if type(var) == types.FunctionType:
             print("Exercising: %s:" % var)
             print(var())
             print()
 
+
 def floatToStr(val):
-    return str(val) if val != UNSET_DOUBLE else "";
+    return str(val) if val != UNSET_DOUBLE else ""
+
 
 def longToStr(val):
-    return str(val) if val != UNSET_LONG else "";
-
-
+    return str(val) if val != UNSET_LONG else ""

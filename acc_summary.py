@@ -291,7 +291,9 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
         if "DailyPnL" in pnl_dic:
             send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
             send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
-            send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
+            send_data["UnrealizedPnL"] = float(
+                pnl_dic["UnrealizedPnL"].replace(",", "")
+            )
 
         try:
             response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
@@ -346,7 +348,9 @@ def update_acc_pnl(
                     "passphrase": PASSPHRASE,
                     "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
                     "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
-                    "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(",", "")),
+                    "GrossPositionValue": float(
+                        pnl_dic["GrossPositionValue"].replace(",", "")
+                    ),
                     "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
                     "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
                 }
@@ -354,8 +358,12 @@ def update_acc_pnl(
                 # add only if there is trade activity
                 if "DailyPnL" in pnl_dic:
                     send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
-                    send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
-                    send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
+                    send_data["RealizedPnL"] = float(
+                        pnl_dic["RealizedPnL"].replace(",", "")
+                    )
+                    send_data["UnrealizedPnL"] = float(
+                        pnl_dic["UnrealizedPnL"].replace(",", "")
+                    )
 
                 response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
 

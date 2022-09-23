@@ -101,17 +101,10 @@ def get_filled_orders(connection_port):
 
         OrID_List = []
         AvgPrice_List = []
-        CumQty_List =[]
-        
-        filled_df = pd.DataFrame(
-            columns=[
-                "Ticker",
-                "OrID",
-                "AvgPrice",
-                "CumQty"
-            ]
-        )
-        
+        CumQty_List = []
+
+        filled_df = pd.DataFrame(columns=["Ticker", "OrID", "AvgPrice", "CumQty"])
+
         output_df = filled_df.copy()
 
         for index, value in exec_series2.items():  # parse series values into a list
@@ -120,32 +113,39 @@ def get_filled_orders(connection_port):
 
             append_2 = value.split("AvgPrice:", 1)[1]
             AvgPrice_List.append(append_2.split(",")[0].replace(" ", ""))
-            
+
             append_3 = value.split("CumQty:", 1)[1]
             CumQty_List.append(append_3.split(",")[0].replace(" ", ""))
 
         array_ticker = exec_status_df["Symbol"]  # convert dic item to array
-           
-        filled_df["Ticker"] = array_ticker      
+
+        filled_df["Ticker"] = array_ticker
         filled_df["OrID"] = OrID_List
         filled_df["AvgPrice"] = AvgPrice_List
         filled_df["CumQty"] = CumQty_List
-       
-        filled_df['CumQty'] = filled_df['CumQty'].astype(float)
-        filled_df["AvgPrice"] = filled_df['AvgPrice'].astype(float)
+
+        filled_df["CumQty"] = filled_df["CumQty"].astype(float)
+        filled_df["AvgPrice"] = filled_df["AvgPrice"].astype(float)
 
         uniq_orids = list(set(OrID_List))  # get a list of unique order ids
         uniq_tickers = list(set(array_ticker))  # get a list of unique ticker
 
         for orid in uniq_orids:
-            filled_df_filtered = filled_df.loc[(filled_df['OrID'] == orid)]
+            filled_df_filtered = filled_df.loc[(filled_df["OrID"] == orid)]
 
-            for ticker in uniq_tickers:  # get the latest order realization for each ticker
-                filled_df_filtered1 = filled_df_filtered.loc[(filled_df_filtered['Ticker'] == ticker)]
+            for (
+                ticker
+            ) in uniq_tickers:  # get the latest order realization for each ticker
+                filled_df_filtered1 = filled_df_filtered.loc[
+                    (filled_df_filtered["Ticker"] == ticker)
+                ]
                 if not filled_df_filtered1.empty:
                     filled_df_filtered2 = filled_df_filtered1.loc[
-                        filled_df_filtered['CumQty'] == filled_df_filtered1.CumQty.max()]
-                    output_df = output_df.append(filled_df_filtered2.iloc[0], ignore_index=True)
+                        filled_df_filtered["CumQty"] == filled_df_filtered1.CumQty.max()
+                    ]
+                    output_df = output_df.append(
+                        filled_df_filtered2.iloc[0], ignore_index=True
+                    )
 
         # close socket
         app3._socketShutdown()
@@ -165,28 +165,34 @@ def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 
     global filled_orders
 
-    filled_orders = get_filled_orders(connection_port)  # get unique filled order dataframe
-   
+    filled_orders = get_filled_orders(
+        connection_port
+    )  # get unique filled order dataframe
+
     if not filled_orders.empty:
-        
-        for ind in filled_orders.index:           
-            print(f"\n{time_str()} - updating order:{filled_orders['OrID'][ind]} with price:{filled_orders['AvgPrice'][ind]}")
+
+        for ind in filled_orders.index:
+            print(
+                f"\n{time_str()} - updating order:{filled_orders['OrID'][ind]} with price:{filled_orders['AvgPrice'][ind]}"
+            )
             # logger.info(f'updating order:{filled_orders['OrID'][ind]} with price:{filled_orders['AvgPrice'][ind]}')
             time.sleep(0.5)
-                       
+
             send_data = {
                 "passphrase": PASSPHRASE,
                 "price": filled_orders["AvgPrice"][ind],
                 "order_id": filled_orders["OrID"][ind],
                 "symbol": filled_orders["Ticker"][ind],
-                "filled_qty": filled_orders["CumQty"][ind]
+                "filled_qty": filled_orders["CumQty"][ind],
             }
 
             try:
                 response = requests.put(API_PUT_UPDATE, json=send_data)
 
                 if response.status_code == 200:
-                    print(f"\n{time_str()} - order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]} is updated")
+                    print(
+                        f"\n{time_str()} - order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]} is updated"
+                    )
                 else:
                     print(
                         f"\n{time_str()} - an error occurred updating the order {filled_orders['OrID'][ind]} for {filled_orders['Ticker'][ind]}"
@@ -224,5 +230,5 @@ def update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE):
 # API_PUT_UPDATE = config.get(environment, "API_PUT_UPDATE")
 # PASSPHRASE = config.get(environment, "PASSPHRASE")
 # connection_port = int(config.get(environment, "CONNECTION_PORT"))
-# #filled_orders = get_filled_orders(connection_port) 
+# #filled_orders = get_filled_orders(connection_port)
 # update_filled_orders(connection_port, PASSPHRASE, API_PUT_UPDATE)

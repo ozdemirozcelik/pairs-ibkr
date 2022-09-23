@@ -18,5 +18,3 @@ class Enum:
 
     def to_str(self, idx):
         return self.idx2name.get(idx, "NOTFOUND")
-
-
