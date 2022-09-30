@@ -5,6 +5,11 @@ For trading tickers in pairs (also possible to trade a single stock, fx, crypto)
 * Trades on Interactive Brokers using [TWS-API](https://interactivebrokers.github.io/tws-api/introduction.html)
 * Integrated with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3)
 * Recommended to use with [IB Gateway](https://www.interactivebrokers.com/en/trading/ibgateway-stable.php)
+* Compatible with TradingView webhooks
+
+# Watch Demo
+
+[![Watch on YouTube](https://ozdemirozcelik.github.io/utubelink.png)](https://www.youtube.com/watch?v=-jfJ6g-fZpI "Watch on YouTube")
 
 
 # Use Cases
