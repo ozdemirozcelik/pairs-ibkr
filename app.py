@@ -536,6 +536,7 @@ async def check_signals():
                             send_data = {
                                 # update fill prices
                                 "passphrase": PASSPHRASE,
+                                "symbol": signal_dic["ticker1"],
                                 "order_id": orderid_to_cancel,
                                 # indicate that this order is canceled
                                 "cancel": True,
