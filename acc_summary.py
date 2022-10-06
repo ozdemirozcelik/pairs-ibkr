@@ -8,6 +8,7 @@ import socket
 import json
 import requests
 
+
 # TODO: error handling and logging
 class TradingApp(EWrapper, EClient):
     def __init__(self):
@@ -271,8 +272,7 @@ def update_acc_pnl_as_json(Server_URL_PNL, account_number, connection_port):
 
 
 def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
-
-    global pnl_dic  # used to see in the varibale explorer of spyder
+    global pnl_dic, send_data  # used to see in the varibale explorer of spyder
 
     pnl_dic = get_acc_summary_with_pnl(ACCOUNT_NUMBER, CONNECTION_PORT)
 
@@ -285,15 +285,16 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
             "GrossPositionValue": float(pnl_dic["GrossPositionValue"].replace(",", "")),
             "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
             "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
+            "DailyPnL": float(-1),
+            "RealizedPnL": float(-1),
+            "UnrealizedPnL": float(-1),
         }
 
         # add only if there is trade activity
         if "DailyPnL" in pnl_dic:
             send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
             send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
-            send_data["UnrealizedPnL"] = float(
-                pnl_dic["UnrealizedPnL"].replace(",", "")
-            )
+            send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
 
         try:
             response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
@@ -303,6 +304,10 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
             else:
                 print(f"\n{time_str()} - an error occurred posting the account summary")
                 # logger.error(f"an error occurred updating the symbol {s} with price:{p}")
+
+        except KeyError:
+            print(f"\n{time_str()} - not possible to get the whole account summary, key error")
+            pass
 
         except requests.Timeout:
             # back off and retry
@@ -319,9 +324,8 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
 
 
 def update_acc_pnl(
-    PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
+        PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
 ):
-
     global pnl_recent_dic, pnl_dic  # used to see in the varibale explorer of spyder
 
     try:
@@ -346,6 +350,8 @@ def update_acc_pnl(
 
                 send_data = {
                     "passphrase": PASSPHRASE,
+                    "rowid": int(rowid),
+                    "timestamp": date_now_formatted,
                     "AvailableFunds": float(pnl_dic["AvailableFunds"].replace(",", "")),
                     "BuyingPower": float(pnl_dic["BuyingPower"].replace(",", "")),
                     "GrossPositionValue": float(
@@ -353,17 +359,15 @@ def update_acc_pnl(
                     ),
                     "MaintMarginReq": float(pnl_dic["MaintMarginReq"].replace(",", "")),
                     "NetLiquidation": float(pnl_dic["NetLiquidation"].replace(",", "")),
+                    "DailyPnL": float(-1),
+                    "RealizedPnL": float(-1),
+                    "UnrealizedPnL": float(-1),
                 }
-
                 # add only if there is trade activity
                 if "DailyPnL" in pnl_dic:
                     send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
-                    send_data["RealizedPnL"] = float(
-                        pnl_dic["RealizedPnL"].replace(",", "")
-                    )
-                    send_data["UnrealizedPnL"] = float(
-                        pnl_dic["UnrealizedPnL"].replace(",", "")
-                    )
+                    send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
+                    send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
 
                 response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
 
@@ -384,18 +388,21 @@ def update_acc_pnl(
         print(f"\n{time_str()} - timeout error")
         pass
 
+    except KeyError:
+        print(f"\n{time_str()} - not possible to get the whole account summary, key error")
+        pass
+
     except requests.ConnectionError:
         print(f"\n{time_str()} - connection error")
         pass
 
-
 # ENABLE TO TEST:
 
 # import os
-#
+
 # print("check if path is correct:", os.getcwd())
 # import configparser
-#
+
 # config = configparser.ConfigParser()
 # config.read("config_private.ini")
 # environment = config.get("environment", "ENV")
