@@ -996,9 +996,9 @@ async def check_signals():
 
                             # prepare the order
 
-                            # send with market order if rerouted
-                            if order_status == "rerouted":
-                                order_type1 = "MARKET"
+                            # if enabled: send with market order if rerouted
+                            #if order_status == "rerouted":
+                            #    order_type1 = "MARKET"
 
                             # only limit order for crypto
                             if sec_type1 == "CRYPTO":
@@ -1024,7 +1024,7 @@ async def check_signals():
                                     ),
                                     first_order,
                                 )
-                            else:  # forward to primary exchange with market order if rerouted
+                            else:  # forward to primary exchange if rerouted
                                 app.placeOrder(
                                     order_id1,
                                     contractIB(
@@ -1077,9 +1077,9 @@ async def check_signals():
                             else:
                                 order_action2 = "buy"
 
-                            # send with market orders if rerouted
+                            # send with market order(2nd order) to primary exchange if rerouted
                             if order_status == "rerouted":
-                                order_type1 = "MARKET"
+                                #order_type1 = "MARKET"
                                 order_type2 = "MARKET"
 
                             first_order = MyOrder(
@@ -1122,7 +1122,7 @@ async def check_signals():
                                     ),
                                     first_order,
                                 )
-                            else:  # forward to primary exchange with market order if rerouted
+                            else:  # forward to primary exchange if rerouted
                                 app.placeOrder(
                                     order_id1,
                                     contractIB(
@@ -1157,7 +1157,7 @@ async def check_signals():
                                     ),
                                     second_order,
                                 )
-                            else:  # forward to primary exchange with market order if rerouted
+                            else:  # forward to primary exchange if rerouted
                                 app.placeOrder(
                                     order_id2,
                                     contractIB(
@@ -1183,7 +1183,7 @@ async def check_signals():
                         # Error 200: The contract description specified for <Symbol> is ambiguous
                         # Error 200: No security definition has been found for the request.
                         # Error 200: Invalid destination exchange specified
-                        reroute_error_codes_array = [200]
+                        reroute_error_codes_array = [200, 320]
                         # try to reroute once, then include error 200 in critical array
                         # Error 387: Unsupported order type for this exchange and security type.
                         # Error 320: reading request. Missing parent order
@@ -1258,10 +1258,10 @@ async def check_signals():
                         ):
 
                             print(
-                                f"\n{time_str()} - critical errors detected, will reroute to primary exchange as market order"
+                                f"\n{time_str()} - critical errors detected, will reroute to primary exchange"
                             )
                             logger.warning(
-                                "critical errors detected, will reroute to primary exchange as market order"
+                                "critical errors detected, will reroute to primary exchange"
                             )
 
                             # get error ids

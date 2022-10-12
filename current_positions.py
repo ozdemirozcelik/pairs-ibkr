@@ -303,7 +303,6 @@ def update_positions_as_json(account_number, Server_URL_Update, connection_port)
         print(f"\n{time_str()} - Portfolio position json file sent to server")
 
 
-# TODO: dd last update time? can be saved with account pnl update
 def update_positions(account_number, connection_port, PASSPHRASE, API_UPDATE_PNL):
 
     # defined to observe in the varibale explorer (spyder)
