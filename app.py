@@ -997,7 +997,7 @@ async def check_signals():
                             # prepare the order
 
                             # if enabled: send with market order if rerouted
-                            #if order_status == "rerouted":
+                            # if order_status == "rerouted":
                             #    order_type1 = "MARKET"
 
                             # only limit order for crypto
@@ -1079,7 +1079,7 @@ async def check_signals():
 
                             # send with market order(2nd order) to primary exchange if rerouted
                             if order_status == "rerouted":
-                                #order_type1 = "MARKET"
+                                # order_type1 = "MARKET"
                                 order_type2 = "MARKET"
 
                             first_order = MyOrder(

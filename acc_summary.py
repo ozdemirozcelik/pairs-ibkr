@@ -294,7 +294,9 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
         if "DailyPnL" in pnl_dic:
             send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
             send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
-            send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
+            send_data["UnrealizedPnL"] = float(
+                pnl_dic["UnrealizedPnL"].replace(",", "")
+            )
 
         try:
             response = requests.post(API_PUT_PNL, json=send_data, timeout=10)
@@ -306,7 +308,9 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
                 # logger.error(f"an error occurred updating the symbol {s} with price:{p}")
 
         except KeyError:
-            print(f"\n{time_str()} - not possible to get the whole account summary, key error")
+            print(
+                f"\n{time_str()} - not possible to get the whole account summary, key error"
+            )
             pass
 
         except requests.Timeout:
@@ -324,7 +328,7 @@ def post_acc_pnl(PASSPHRASE, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT):
 
 
 def update_acc_pnl(
-        PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
+    PASSPHRASE, API_GET_PNL, API_PUT_PNL, ACCOUNT_NUMBER, CONNECTION_PORT
 ):
     global pnl_recent_dic, pnl_dic  # used to see in the varibale explorer of spyder
 
@@ -366,8 +370,12 @@ def update_acc_pnl(
                 # add only if there is trade activity
                 if "DailyPnL" in pnl_dic:
                     send_data["DailyPnL"] = float(pnl_dic["DailyPnL"].replace(",", ""))
-                    send_data["RealizedPnL"] = float(pnl_dic["RealizedPnL"].replace(",", ""))
-                    send_data["UnrealizedPnL"] = float(pnl_dic["UnrealizedPnL"].replace(",", ""))
+                    send_data["RealizedPnL"] = float(
+                        pnl_dic["RealizedPnL"].replace(",", "")
+                    )
+                    send_data["UnrealizedPnL"] = float(
+                        pnl_dic["UnrealizedPnL"].replace(",", "")
+                    )
 
                 response = requests.put(API_PUT_PNL, json=send_data, timeout=10)
 
@@ -389,12 +397,15 @@ def update_acc_pnl(
         pass
 
     except KeyError:
-        print(f"\n{time_str()} - not possible to get the whole account summary, key error")
+        print(
+            f"\n{time_str()} - not possible to get the whole account summary, key error"
+        )
         pass
 
     except requests.ConnectionError:
         print(f"\n{time_str()} - connection error")
         pass
+
 
 # ENABLE TO TEST:
 
