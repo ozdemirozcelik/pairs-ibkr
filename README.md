@@ -3,7 +3,7 @@
 For trading tickers in pairs (also possible to trade a single stock, fx, crypto).
 
 * Trades on Interactive Brokers using [TWS-API](https://interactivebrokers.github.io/tws-api/introduction.html)
-* Integrated with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3)
+* Integrated with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api)
 * Recommended to use with [IB Gateway](https://www.interactivebrokers.com/en/trading/ibgateway-stable.php)
 * Compatible with TradingView webhooks
 
@@ -15,7 +15,7 @@ For trading tickers in pairs (also possible to trade a single stock, fx, crypto)
 # Use Cases
 
 With Pairs-API you can:
-- integrate with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3) trade platform
+- integrate with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api) trade platform
 - validate orders (ticker information, order size, dublicate orders, pair synchronization, minimum funds etc.) 
 - send real time orders (Relative, Market, Limit) to Interactive Brokers
 - get filled order information
