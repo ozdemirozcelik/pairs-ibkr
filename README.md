@@ -82,7 +82,7 @@ https://github.com/conda/conda/issues/9519#issuecomment-690486632
 
 # Configuration
 
-* configure config.ini file in line with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v3) and IB account details:
+* configure config.ini file in line with [Pairs-API](https://github.com/ozdemirozcelik/pairs-api-v4) and IB account details:
 
 ```ini
 # DESCRIPTIONS:
@@ -112,16 +112,16 @@ AVAILABLE_FUND_FLOOR : 5000
 CONNECTION_PORT : 7497
 PASSPHRASE : webhook
 SYNC_PAIR : True
-API_PUT_SIGNAL : http://127.0.0.1:5000/v3/webhook
-API_PUT_UPDATE : http://127.0.0.1:5000/v3/signal/updateorder
-API_GET_SIGNAL : http://127.0.0.1:5000/v3/signal/
-API_GET_PAIR : http://127.0.0.1:5000/v3/pair/
-API_GET_TICKER : http://127.0.0.1:5000/v3/ticker/
-API_UPDATE_PNL : http://127.0.0.1:5000/v3/ticker/updatepnl
-API_PUT_PNL : http://127.0.0.1:5000/v3/regpnl
-API_GET_PNL : http://127.0.0.1:5000/v3/pnl/1
-API_GET_SIGNAL_WAITING : http://127.0.0.1:5000/v3/signals/status/waiting/0
-API_GET_SIGNAL_ROUTE : http://127.0.0.1:5000/v3/signals/status/rerouted/0
+API_PUT_SIGNAL : http://127.0.0.1:5000/v4/webhook
+API_PUT_UPDATE : http://127.0.0.1:5000/v4/signal/updateorder
+API_GET_SIGNAL : http://127.0.0.1:5000/v4/signal/
+API_GET_PAIR : http://127.0.0.1:5000/v4/pair/
+API_GET_TICKER : http://127.0.0.1:5000/v4/ticker/
+API_UPDATE_PNL : http://127.0.0.1:5000/v4/ticker/updatepnl
+API_PUT_PNL : http://127.0.0.1:5000/v4/regpnl
+API_GET_PNL : http://127.0.0.1:5000/v4/pnl/1
+API_GET_SIGNAL_WAITING : http://127.0.0.1:5000/v4/signals/status/waiting/0
+API_GET_SIGNAL_ROUTE : http://127.0.0.1:5000/v4/signals/status/rerouted/0
 ACCOUNT_NUMBER = DU######
 LOGFILE_NAME : logs\logdev_
 
